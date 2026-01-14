@@ -12,7 +12,7 @@ function DiagonalEnemy:init(x, y, entity)
 	self:setImage(DiagonalEnemyImage)
 	self:setCollideRect(0, 0, 16, 16)
 	self:setGroups(COLLISION_GROUPS.ENEMY)
-	self:setCollidesWithGroups({COLLISION_GROUPS.PROJECTILE, COLLISION_GROUPS.WALL, COLLISION_GROUPS.TRIGGER, COLLISION_GROUPS.PLAYER})
+	self:setCollidesWithGroups({COLLISION_GROUPS.PROJECTILE, COLLISION_GROUPS.WALL, COLLISION_GROUPS.TRIGGER, COLLISION_GROUPS.PLAYER, COLLISION_GROUPS.ENEMY})
 	local velocity = vector2DNew(entity.fields.Direction.cx * 16 - x, entity.fields.Direction.cy * 16 - y)
 	velocity:normalize()
 	self.xVel = velocity.x * entity.fields.Speed
