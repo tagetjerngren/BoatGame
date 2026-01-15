@@ -240,23 +240,37 @@ function Player:update()
 		-- 	self:PassiveAbility()
 		-- end
 
+		local TeleportDistance = 64
+		-- NOTE: Press the same button within this many frames for it to count as a double tap
+		local TeleportDoubleTapFrames = 5
+
 		if self.bCanTeleport then
 			if pd.buttonJustPressed(pd.kButtonLeft) and self.bDoubleLeft then
-				self:moveBy(-64, 0)
-				self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				self:moveBy(-TeleportDistance, 0)
+				local Collisions = self:overlappingSprites()
+				if #Collisions > 0 then
+					self:moveBy(TeleportDistance, 0)
+				else
+					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				end
 			elseif pd.buttonJustPressed(pd.kButtonLeft) then
 				self.bDoubleLeft = true
-				pd.frameTimer.performAfterDelay(5, function ()
+				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
 					self.bDoubleLeft = false
 				end)
 			end
 
 			if pd.buttonJustPressed(pd.kButtonRight) and self.bDoubleRight then
-				self:moveBy(64, 0)
-				self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				self:moveBy(TeleportDistance, 0)
+				local Collisions = self:overlappingSprites()
+				if #Collisions > 0 then
+					self:moveBy(-TeleportDistance, 0)
+				else
+					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				end
 			elseif pd.buttonJustPressed(pd.kButtonRight) then
 				self.bDoubleRight = true
-				pd.frameTimer.performAfterDelay(5, function ()
+				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
 					self.bDoubleRight = false
 				end)
 			end
