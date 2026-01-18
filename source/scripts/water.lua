@@ -8,6 +8,7 @@ local gfx <const> = pd.graphics
 class('Water').extends(gfx.sprite)
 
 function Water:init(Height, Width, LowerBound, UpperBound, RateOfChange, DistanceBetweenParticles)
+	self.bFirstCollection = true
 	self.bOldSystem = true
 	self.height = Height
 	self.width = Width

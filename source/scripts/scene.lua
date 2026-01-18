@@ -118,7 +118,8 @@ function Scene:init(bLoadGame)
 		end
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
 		self.water = Water(SaveData["WaterHeight"], self.LevelWidth, 0, self.LevelHeight, 0.2, WaterParticleDensity)
-		self.water.bActive = SaveData["WaterWheelCollected"]
+		self.water.bActive = SaveData["WaterWheelInPossession"]
+		self.water.bFirstCollection = SaveData["WaterWheelCollected"]
 		self:goToLevel(SaveData["CurrentLevel"])
 		if SaveData["PlayerCorpseX"] then
 			self.playerCorpse = PlayerCorpse(SaveData["PlayerCorpseX"], SaveData["PlayerCorpseY"], SaveData["PlayerCorpseLevel"], self, SaveData["PlayerCorpseCoins"], SaveData["PlayerCorpseDirection"])
@@ -300,7 +301,7 @@ function Scene:goToLevel(level_name)
 			self.SpawnY = entityY + 32
 		elseif entityName == "AbilityPickup" and not self.collectedEntities[entity.iid] then
 			self.entityInstance[entity.iid] = AbilityPickup(entityX, entityY, entity)
-		elseif entityName == "WaterWheel" and not self.collectedEntities[entity.iid] then
+		elseif entityName == "WaterWheel" then
 			self.entityInstance[entity.iid] = WaterWheel(entityX, entityY, entity, self.water)
 		elseif entityName == "Coin" and not self.collectedEntities[entity.iid] then
 			self.entityInstance[entity.iid] = Coin(entityX, entityY, entity)

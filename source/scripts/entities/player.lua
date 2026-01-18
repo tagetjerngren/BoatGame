@@ -218,7 +218,7 @@ function Player:update()
 
 	if self.bActive then
 
-		if pd.buttonIsPressed(pd.kButtonUp) then
+		if pd.buttonJustPressed(pd.kButtonUp) then
 			local CollidingWithSprites = self:overlappingSprites()
 			for _, sprite in ipairs(CollidingWithSprites) do
 				if sprite.interact then

@@ -23,7 +23,7 @@
 				"levelIid": "6e771a30-ac70-11f0-8440-57ef4e180f3c",
 				"layerIid": "6e771a31-ac70-11f0-8440-39c7ad48ed82",
 				"entityIid": "a8845170-d380-11f0-b154-0742c217aaf7"
-			}, "worldX": 4064, "worldY": 272, "widPx": 64, "heiPx": 64, "fields" : {} }]
+			}, "worldX": 4048, "worldY": 384, "widPx": 64, "heiPx": 64, "fields" : {} }]
 		},
 		{
 			"identifier": "Coin",
@@ -13853,7 +13853,7 @@
 						},
 						{
 							"__identifier": "WaterWheel",
-							"__grid": [62,3],
+							"__grid": [61,10],
 							"__pivot": [0,0],
 							"__tags": ["Pickup"],
 							"__tile": { "tilesetUid": 404, "x": 0, "y": 96, "w": 64, "h": 64 },
@@ -13862,10 +13862,10 @@
 							"width": 64,
 							"height": 64,
 							"defUid": 138,
-							"px": [992,48],
+							"px": [976,160],
 							"fieldInstances": [],
-							"__worldX": 4064,
-							"__worldY": 272
+							"__worldX": 4048,
+							"__worldY": 384
 						},
 						{
 							"__identifier": "WaterLevelChanger",

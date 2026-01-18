@@ -34,14 +34,12 @@ function WaterLevelChanger:update()
     for i = 1, #SceneManager.water.pointPositions do
         SceneManager.water.pointPositions[i][2] += self.rateOfChange
     end
-    
-    if SceneManager.water.height > self.minHeight or SceneManager.water.height < self.maxHeight then
-        print(SceneManager.water.height.." "..self.minHeight.." "..self.maxHeight)
-        self.rateOfChange *= -1
-        if self.rateOfChange < 0 then
-            self:setImage(self.upImage)
-        else
-            self:setImage(self.downImage)
-        end
-    end
+
+    if SceneManager.water.height > self.minHeight then
+		self.rateOfChange = -1
+		self:setImage(self.upImage)
+	elseif SceneManager.water.height < self.maxHeight then
+		self.rateOfChange = 1
+		self:setImage(self.downImage)
+	end
 end
