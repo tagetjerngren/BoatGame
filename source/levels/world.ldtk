@@ -11,7 +11,7 @@
 	"iid": "a5e0faa0-25d0-11ef-a85a-69c27ce57690",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 520,
+	"nextUid": 522,
 	"identifierStyle": "Capitalize",
 	"toc": [
 		{ "identifier": "AbilityPickup", "instances": [], "instancesData": [] },
@@ -3799,6 +3799,80 @@
 					"regex": null,
 					"acceptFileTypes": null,
 					"defaultOverride": { "id": "V_Float", "params": [3] },
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "Loop",
+					"doc": null,
+					"__type": "Bool",
+					"uid": 520,
+					"type": "F_Bool",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "InitialProgress",
+					"doc": null,
+					"__type": "Float",
+					"uid": 521,
+					"type": "F_Float",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": 0,
+					"max": 1,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": true,
@@ -12348,7 +12422,9 @@
 									"id": "V_String",
 									"params": ["16,10"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2496,
 							"__worldY": 480
@@ -12370,7 +12446,9 @@
 									"id": "V_String",
 									"params": ["19,9"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2544,
 							"__worldY": 480
@@ -12392,7 +12470,9 @@
 									"id": "V_String",
 									"params": ["22,8"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2592,
 							"__worldY": 480
@@ -12414,7 +12494,9 @@
 									"id": "V_String",
 									"params": ["10,22"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 1.5, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [1.5] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 1.5, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [1.5] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2304,
 							"__worldY": 464
@@ -12436,7 +12518,9 @@
 									"id": "V_String",
 									"params": ["35,11"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2704,
 							"__worldY": 288
@@ -12458,7 +12542,9 @@
 									"id": "V_String",
 									"params": ["30,15"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2816,
 							"__worldY": 352
@@ -12480,7 +12566,9 @@
 									"id": "V_String",
 									"params": ["37,19"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2736,
 							"__worldY": 416
@@ -12502,7 +12590,9 @@
 									"id": "V_String",
 									"params": ["9,11"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 3, "__tile": null, "defUid": 180, "realEditorValues": [] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 3, "__tile": null, "defUid": 180, "realEditorValues": [] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2304,
 							"__worldY": 288
@@ -12524,7 +12614,9 @@
 									"id": "V_String",
 									"params": ["32,23"]
 								}] },
-								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] }
+								{ "__identifier": "SpikeBallSpeed", "__type": "Float", "__value": 2, "__tile": null, "defUid": 180, "realEditorValues": [{ "id": "V_Float", "params": [2] }] },
+								{ "__identifier": "Loop", "__type": "Bool", "__value": false, "__tile": null, "defUid": 520, "realEditorValues": [] },
+								{ "__identifier": "InitialProgress", "__type": "Float", "__value": 0, "__tile": null, "defUid": 521, "realEditorValues": [] }
 							],
 							"__worldX": 2848,
 							"__worldY": 480
