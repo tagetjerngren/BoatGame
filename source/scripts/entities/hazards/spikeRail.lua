@@ -38,7 +38,7 @@ function SpikeRail:init(x, y, entity)
 		local EndPoint = InitialProgress * Sum
 
 		for i = 1, #self.path do
-			if EndPoint < Points[i] then
+			if EndPoint <= Points[i] then
 				local Remainder = EndPoint - Points[i-1]
 				local ToTarget = pd.geometry.vector2D.new(self.path[i].x - self.path[i - 1].x, self.path[i].y - self.path[i - 1].y)
 				local StartPoint = ToTarget:normalized() * Remainder + pd.geometry.vector2D.new(self.path[i - 1].x, self.path[i - 1].y)
