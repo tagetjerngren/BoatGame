@@ -219,6 +219,14 @@ function LDtk.load( ldtk_file, use_lua_levels )
 	end
 end
 
+function LDtk.get_level_names()
+	local LevelNames = {}
+	for k, _ in pairs(_levels) do
+		table.insert(LevelNames, k)
+	end
+	return LevelNames
+end
+
 -- Call this function to save the LDtk level in lua files to improve loading performance
 -- The files will be saved in the aave folder of the game (PlaydateSDK/Disk/Data)
 function LDtk.export_to_lua_files()
