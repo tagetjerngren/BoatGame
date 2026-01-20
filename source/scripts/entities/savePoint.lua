@@ -34,7 +34,7 @@ end
 function SavePoint:save(GameManager)
 	PopupTextBox("*SAVED*", 2000, 10)
 	self.saveSound:play()
-	SaveGame(GameManager)
+	SaveGame(GameManager, self.x, self.y)
 end
 
 function SavePoint:interact(player)

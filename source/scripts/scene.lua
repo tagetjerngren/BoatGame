@@ -54,6 +54,8 @@ import "scripts/entities/companion"
 import "scripts/entities/plant"
 import "scripts/entities/sample"
 import "scripts/WaterLevelChanger"
+import "scripts/optionBoxVertical"
+import "scripts/checkboxMenu"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
@@ -61,6 +63,59 @@ local gfx <const> = pd.graphics
 local WaterParticleDensity = 50
 
 class('Scene').extends()
+
+function Scene:DebugMenu()
+	OptionBoxVertical("*Debug*", {"Warp", "Abilites", "Cheats", "Save Game", "Clear Save Data", "Close"}, function(index, str)
+		if index == 1 then
+			OptionBoxVertical("*Warp*", LDtk.get_level_names(), function(index, str)
+				-- TextBox(str, 10)
+				self:goToLevel(str)
+				-- TODO: Make this behavior a function
+				self.player:moveTo(self.SpawnX, self.SpawnY)
+				self.player.PhysicsComponent:setPosition(self.SpawnX, self.SpawnY)
+				self.camera:center(self.player.x, self.player.y)
+				-- self.water.height = self.SpawnY
+				self.water:SetHeight(self.SpawnY)
+			end)
+		elseif index == 2 then
+			local AbilityNames = {
+				"Water Wheel",
+				"Teleport Device",
+				"Change Size Device",
+				"Wheels"
+			}
+			local AbilityActive = {
+				self.water.bActive,
+				self.player.bCanTeleport,
+				self.player.bHasChangeSizeDevice,
+				self.player.bHasWheels
+			}
+
+			CheckboxMenu("*Abilities*", AbilityNames, AbilityActive, function(options, values)
+				self.water.bActive = values[1]
+				self.player.bCanTeleport = values[2]
+				self.player.bHasChangeSizeDevice = values[3]
+				self.player.bHasWheels = values[4]
+				self:DebugMenu()
+			end)
+		elseif index == 3 then
+			local CheatNames = {
+				"Invincibility"
+			}
+			local CheatActive = {
+				false
+			}
+			CheckboxMenu("*Cheats*", CheatNames, CheatActive, function(options, values)
+			end)
+		elseif index == 4 then
+			TextBox("Saved!", 10)
+			SaveGame(self, self.player.x, self.player.y)
+		elseif index == 5 then
+			TextBox("Cleared Save!", 10)
+			ClearSave()
+		end
+	end)
+end
 
 function Scene:init(bLoadGame)
 	self.miniMap = pd.datastore.readImage("MiniMap/miniMap")
@@ -72,6 +127,8 @@ function Scene:init(bLoadGame)
 	end
 
 	self.menu = pd.getSystemMenu()
+
+
 	self.menuItem, self.error = self.menu:addMenuItem("Swap Crank", function()
 		self.water.bOldSystem = not self.water.bOldSystem
 	end)
@@ -79,6 +136,10 @@ function Scene:init(bLoadGame)
 	self.menuItem2, error = self.menu:addMenuItem("View Samples", function ()
 		self:DeactivatePhysicsComponents()
 		CollectionMenu(self)
+	end)
+
+	self.menuItem3, _ = self.menu:addMenuItem("Debug Menu", function()
+		self:DebugMenu()
 	end)
 
 	self.ActivePhysicsComponents = {}
@@ -113,7 +174,7 @@ function Scene:init(bLoadGame)
 		local level_rect = LDtk.get_rect(SaveData["CurrentLevel"])
 		if not level_rect then
 			print("INVALID LEVEL IN SAVE FILE")
-			SaveData["CurrentLevel"] = "Level_0"
+			SaveData["CurrentLevel"] = "Starting_Area"
 			level_rect = LDtk.get_rect(SaveData["CurrentLevel"])
 		end
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
@@ -132,10 +193,10 @@ function Scene:init(bLoadGame)
 	else
 		self.collectedEntities = {}
 		self.player = Player(0, 0, gfx.image.new("images/Boat"), 5, self)
-		local level_rect = LDtk.get_rect("Level_0")
+		local level_rect = LDtk.get_rect("Starting_Area")
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
 		self.water = Water(100, self.LevelWidth, 0, self.LevelHeight, 0.1, WaterParticleDensity)
-		self:goToLevel("Level_0")
+		self:goToLevel("Starting_Area")
 		self.player:moveTo(self.SpawnX, self.SpawnY)
 		self.player.PhysicsComponent:setPosition(self.SpawnX, self.SpawnY)
 		self.camera:center(self.player.x, self.player.y)

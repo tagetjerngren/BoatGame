@@ -19,12 +19,12 @@ function ClearSave()
 	ds.delete()
 end
 
-function SaveGame(GameManager)
+function SaveGame(GameManager, PositionX, PositionY)
 	local SaveData = {
 		-- Positioning
 		["CurrentLevel"] = GameManager.currentLevel,
-		["PlayerX"] = GameManager.player.savePoint.x,
-		["PlayerY"] = GameManager.player.savePoint.y,
+		["PlayerX"] = PositionX,
+		["PlayerY"] = PositionY,
 		["PlayerDirection"] = GameManager.player.direction,
 
 		-- Player Attributes
