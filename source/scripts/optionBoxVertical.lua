@@ -45,7 +45,7 @@ function OptionBoxVertical:init(prompt, options, callback)
 	-- NOTE: This is the size of each cell
 	local CellWidth = (self.gridWidth - contentInset * 2 - cellPadding * 2)
 	local CellHeight = (self.gridHeight - contentInset * 2 - (promptHeight + 15) - cellPadding * 2 * #options)/#options
-	CellHeight = math.max(CellHeight, 50)
+	CellHeight = math.max(CellHeight, 32)
 	self.grid = pd.ui.gridview.new(CellWidth, CellHeight)
 
 	self.grid:setNumberOfColumns(1)

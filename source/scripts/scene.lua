@@ -106,6 +106,7 @@ function Scene:DebugMenu()
 				false
 			}
 			CheckboxMenu("*Cheats*", CheatNames, CheatActive, function(options, values)
+				self:DebugMenu()
 			end)
 		elseif index == 4 then
 			TextBox("Saved!", 10)
