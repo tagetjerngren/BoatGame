@@ -29,7 +29,8 @@ function Player:init(x, y, image, speed, gameManager)
 	self:setGroups(COLLISION_GROUPS.PLAYER)
 	self:setCollidesWithGroups({COLLISION_GROUPS.WALL, COLLISION_GROUPS.ENEMY, COLLISION_GROUPS.EXPLOSIVE, COLLISION_GROUPS.TRIGGER, COLLISION_GROUPS.PICKUPS})
 
-	self.Health = 100
+	self.MaxHealth = 6
+	self.Health = self.MaxHealth
 	self.Invincible = 0
 	self.coins = 0
 	self.explosionMeter = 0
@@ -81,9 +82,14 @@ function Player:damage(amount, iFrames)
 	end
 end
 
+function Player:knockback(force)
+	self.PhysicsComponent:addForce(force)
+	-- self.PhysicsComponent:setVelocity(force.x, force.y)
+end
+
 function Player:Respawn()
 	self:add()
-	self.Health = 100
+	self.Health = self.MaxHealth
 
 	self.GameManager.playerCorpse = PlayerCorpse(self.x, self.y, self.GameManager.currentLevel, self.GameManager, self.coins, self.direction)
 	self.coins = 0
@@ -115,16 +121,31 @@ local HealthImage = nil
 local OldCoin = nil
 local CoinImage = nil
 
+local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
+local FullHeartImage = gfx.image.new("images/HeartIcon")
+local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
+
 function Player:DrawHealthBar()
 	if (OldHealth ~= self.Health) then
 		HealthImage = gfx.image.new(150, 100)
 		gfx.lockFocus(HealthImage)
-		local ns = gfx.nineSlice.new("images/WallResizable", 5, 5, 6, 6)
-		local nsBlank = gfx.nineSlice.new("images/OneWayDoor", 5, 5, 22, 22)
-		nsBlank:drawInRect(10, 10, 100, 20)
-		if self.Health > 0 then
-			ns:drawInRect(10, 10, 100 * (self.Health / 100), 20)
+
+		local FullHearts = math.floor(self.Health / 2)
+		local HaveHalfHeart = (self.Health % 2) == 1
+		local EmptyHearts = math.floor((self.MaxHealth - self.Health) / 2)
+
+		for i = 1, FullHearts do
+			FullHeartImage:draw(16 + (i - 1) * 32, 16)
 		end
+
+		if HaveHalfHeart then
+			HalfHeartImage:draw(16 + (FullHearts) * 32, 16)
+		end
+
+		for i = math.ceil(self.Health / 2) + 1, self.MaxHealth / 2 do
+			EmptyHeartImage:draw(16 + (i - 1) * 32, 16)
+		end
+
 		gfx.unlockFocus()
 	end
 
