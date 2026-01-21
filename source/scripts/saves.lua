@@ -44,7 +44,7 @@ function SaveGame(GameManager, PositionX, PositionY)
 		-- Water
 		["WaterHeight"] = GameManager.water.height,
 		["WaterWheelCollected"] = GameManager.water.bFirstCollection,
-		["WaterWheelInPossession"] = GameManager.water.bActive,
+		["WaterWheelInPossession"] = GameManager.water.bWaterWheelPossessed,
 
 		-- Collected Entities (Coins, Abilities, and the Water Wheel)
 		["CollectedEntities"] = GameManager.collectedEntities

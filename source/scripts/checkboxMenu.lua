@@ -75,7 +75,7 @@ function CheckboxMenu:init(prompt, options, optionValues, callback)
 			gfx.setImageDrawMode(gfx.kDrawModeCopy)
 		end
 	end
-	self:setZIndex(10)
+	self:setZIndex(1000)
 	self:add()
 end
 

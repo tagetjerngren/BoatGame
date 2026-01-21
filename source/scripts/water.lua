@@ -15,7 +15,9 @@ function Water:init(Height, Width, LowerBound, UpperBound, RateOfChange, Distanc
 	self.lowerBound = LowerBound
 	self.upperBound = UpperBound
 	self.rateOfChange = RateOfChange
+
 	self.bActive = false
+	self.bWaterWheelPossessed = false
 
 	self.pointPositions = {}
 	self.pointVelocity = {}
@@ -167,7 +169,7 @@ function Water:Spring()
 end
 
 function Water:update()
-	if self.bActive then
+	if self.bActive and self.bWaterWheelPossessed then
 		if self.bOldSystem then
 			local change, _ = pd.getCrankChange()
 			local oldHeight = self.height

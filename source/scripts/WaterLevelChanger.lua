@@ -26,7 +26,7 @@ function WaterLevelChanger:init(x, y, Entity)
 end
 
 function WaterLevelChanger:update()
-    if SceneManager.water.bActive then
+    if SceneManager.water.bWaterWheelPossessed then
         return
     end
 

@@ -85,14 +85,14 @@ function Scene:DebugMenu()
 				"Wheels"
 			}
 			local AbilityActive = {
-				self.water.bActive,
+				self.water.bWaterWheelPossessed,
 				self.player.bCanTeleport,
 				self.player.bHasChangeSizeDevice,
 				self.player.bHasWheels
 			}
 
 			CheckboxMenu("*Abilities*", AbilityNames, AbilityActive, function(options, values)
-				self.water.bActive = values[1]
+				self.water.bWaterWheelPossessed = values[1]
 				self.player.bCanTeleport = values[2]
 				self.player.bHasChangeSizeDevice = values[3]
 				self.player.bHasWheels = values[4]
@@ -180,7 +180,7 @@ function Scene:init(bLoadGame)
 		end
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
 		self.water = Water(SaveData["WaterHeight"], self.LevelWidth, 0, self.LevelHeight, 0.2, WaterParticleDensity)
-		self.water.bActive = SaveData["WaterWheelInPossession"]
+		self.water.bWaterWheelPossessed = SaveData["WaterWheelInPossession"]
 		self.water.bFirstCollection = SaveData["WaterWheelCollected"]
 		self:goToLevel(SaveData["CurrentLevel"])
 		if SaveData["PlayerCorpseX"] then
