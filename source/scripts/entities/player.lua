@@ -92,7 +92,7 @@ function Player:Respawn()
 		self.GameManager:goToLevel(self.savePoint.level)
 		self:moveTo(self.savePoint.x, self.savePoint.y + 8)
 	else
-		self.GameManager:reloadLevel()
+		self.GameManager:goToLevel("Starting_Area")
 		self:moveTo(self.GameManager.SpawnX, self.GameManager.SpawnY)
 	end
 
