@@ -59,15 +59,25 @@ function OptionBoxVertical:init(prompt, options, callback)
 	local ns = gfx.nineSlice.new("images/WallResizable", 5, 5, 6, 6)
 	local nsBlank = gfx.nineSlice.new("images/OneWayDoor", 5, 5, 22, 22)
 
+	local SelectedCellImage = gfx.image.new(CellWidth, CellHeight)
+	gfx.lockFocus(SelectedCellImage)
+	nsBlank:drawInRect(0, 0, CellWidth, CellHeight)
+	gfx.unlockFocus()
+
+	local UnselectedCellImage = gfx.image.new(CellWidth, CellHeight)
+	gfx.lockFocus(UnselectedCellImage)
+	ns:drawInRect(0, 0, CellWidth, CellHeight)
+	gfx.unlockFocus()
+
 	function self.grid:drawCell(section, row, column, selected, x, y, width, height)
 		gfx.setColor(gfx.kColorBlack)
 		if selected then
-			nsBlank:drawInRect(x, y, width, height)
+			SelectedCellImage:draw(x, y)
 			gfx.setImageDrawMode(gfx.kDrawModeCopy)
 			gfx.setColor(gfx.kColorWhite)
 			gfx.drawTextInRect(option[row], x, y + (height/2) - 10 + 2 * math.sin(7 * pd.getElapsedTime()), width, height, nil, nil, kTextAlignment.center)
 		else
-			ns:drawInRect(x, y, width, height)
+			UnselectedCellImage:draw(x, y)
 			gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
 			gfx.drawTextInRect(option[row], x, y + (height/2) - 10, width, height, nil, nil, kTextAlignment.center)
 			gfx.setImageDrawMode(gfx.kDrawModeCopy)
