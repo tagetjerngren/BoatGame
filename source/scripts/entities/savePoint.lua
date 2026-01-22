@@ -40,7 +40,7 @@ end
 function SavePoint:interact(player)
 	if self.bCanSave then
 		player.savePoint = self
-		player.Health = 100
+		player.Health = player.MaxHealth
 		self:save(player.GameManager)
 		self.bCanSave = false
 		pd.frameTimer.performAfterDelay(30, function()

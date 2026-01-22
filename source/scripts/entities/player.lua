@@ -72,6 +72,7 @@ function Player:damage(amount, iFrames)
 	self.Health -= amount
 	self.Invincible = iFrames
 	if self.Health <= 0 then
+		self.Health = 0
 		Explosion(self.x, self.y)
 		self:setVisible(false)
 		self.bActive = false
@@ -126,28 +127,26 @@ local FullHeartImage = gfx.image.new("images/HeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
 
 function Player:DrawHealthBar()
-	if (OldHealth ~= self.Health) then
-		HealthImage = gfx.image.new(150, 100)
-		gfx.lockFocus(HealthImage)
+	HealthImage = gfx.image.new(150, 100)
+	gfx.lockFocus(HealthImage)
 
-		local FullHearts = math.floor(self.Health / 2)
-		local HaveHalfHeart = (self.Health % 2) == 1
-		local EmptyHearts = math.floor((self.MaxHealth - self.Health) / 2)
+	local FullHearts = math.floor(self.Health / 2)
+	local HaveHalfHeart = (self.Health % 2) == 1
+	local EmptyHearts = math.floor((self.MaxHealth - self.Health) / 2)
 
-		for i = 1, FullHearts do
-			FullHeartImage:draw(16 + (i - 1) * 32, 16)
-		end
-
-		if HaveHalfHeart then
-			HalfHeartImage:draw(16 + (FullHearts) * 32, 16)
-		end
-
-		for i = math.ceil(self.Health / 2) + 1, self.MaxHealth / 2 do
-			EmptyHeartImage:draw(16 + (i - 1) * 32, 16)
-		end
-
-		gfx.unlockFocus()
+	for i = 1, FullHearts do
+		FullHeartImage:draw(16 + (i - 1) * 32, 16)
 	end
+
+	if HaveHalfHeart then
+		HalfHeartImage:draw(16 + (FullHearts) * 32, 16)
+	end
+
+	for i = math.ceil(self.Health / 2) + 1, self.MaxHealth / 2 do
+		EmptyHeartImage:draw(16 + (i - 1) * 32, 16)
+	end
+
+	gfx.unlockFocus()
 
 	UISystem:drawImageAt(HealthImage, 0, 0)
 
@@ -339,7 +338,7 @@ function Player:update()
 	self.bUnderwater = self.y > self.GameManager.water.height
 	for i = 1, #collisions do
 		if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then
-			self:damage(10, 15)
+			self:damage(1, 15)
 		end
 		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
 			self.bGrounded = true

@@ -11,6 +11,7 @@ import "scripts/entities/abilities/submerge"
 import "scripts/entities/abilities/teleportationDevice"
 import "scripts/entities/abilities/waterWheel"
 import "scripts/entities/abilities/wheelPickup"
+import "scripts/entities/heart_expansion"
 
 -- NOTE: Hazards
 import "scripts/entities/hazards/bouncingSpike"
@@ -67,7 +68,9 @@ class('Scene').extends()
 function Scene:DebugMenu()
 	OptionBoxVertical("*Debug*", {"Warp", "Abilites", "Cheats", "Save Game", "Clear Save Data", "Close"}, function(index, str)
 		if index == 1 then
-			OptionBoxVertical("*Warp*", LDtk.get_level_names(), function(index, str)
+			local LevelNames = LDtk.get_level_names()
+			table.sort(LevelNames)
+			OptionBoxVertical("*Warp*", LevelNames, function(index, str)
 				-- TextBox(str, 10)
 				self:goToLevel(str)
 				-- TODO: Make this behavior a function
@@ -421,6 +424,8 @@ function Scene:goToLevel(level_name)
 			self.entityInstance[entity.iid] = InvisibilityDevice(entityX, entityY, entity)
 		elseif entityName == "ChangeSizeDevice" and not self.collectedEntities[entity.iid] then
 			self.entityInstance[entity.iid] = ChangeSizeDevice(entityX, entityY, entity)
+		elseif entityName == "HeartExpansion" and not self.collectedEntities[entity.iid] then
+			self.entityInstance[entity.iid] = HeartExpansion(entityX, entityY, entity)
 		elseif entityName == "WheelPickup" and not self.collectedEntities[entity.iid] then
 			self.entityInstance[entity.iid] = WheelPickup(entityX, entityY, entity)
 		elseif entityName == "TheUpgrader" then
