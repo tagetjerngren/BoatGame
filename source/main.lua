@@ -8,6 +8,8 @@ COLLISION_GROUPS = {
 	PICKUPS = 7,
 	WATER = 8
 }
+
+-- NOTE: Core Imports
 import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
@@ -16,20 +18,20 @@ import "CoreLibs/crank"
 import "CoreLibs/math"
 import "CoreLibs/ui"
 
--- Utilities
-import "scripts/camera"
-import "scripts/buoyancy"
-import "scripts/saves"
+-- NOTE: Utilities
+import "scripts/Misc/camera"
+import "scripts/Misc/buoyancy"
+import "scripts/Misc/saves"
 
--- Game Objects
-import "scripts/entities/player"
-import "scripts/water"
-import "scripts/scene"
-import "scripts/entities/ui"
-import "scripts/miniMapViewer"
-import "scripts/collectionMenu"
-import "scripts/mainMenu"
-import "scripts/intro"
+-- NOTE: Game Objects
+import "scripts/Entities/player"
+import "scripts/Misc/water"
+import "scripts/game_manager"
+import "scripts/Misc/ui"
+import "scripts/Scenes/mini_map_viewer"
+import "scripts/Scenes/collection_menu"
+import "scripts/Scenes/main_menu"
+import "scripts/Scenes/intro"
 
 
 local pd <const> = playdate
