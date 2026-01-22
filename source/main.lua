@@ -142,6 +142,9 @@ function MainMenuLoop()
 			-- NOTE: Uncomment below and remove the last two lines to bring back the intro sequence
 			-- intro = Intro()
 			-- pd.update = IntroLoop
+			if not pd.isSimulator then
+				LDtk.load("levels/world.ldtk", true)
+			end
 			SceneManager = Scene(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		else
