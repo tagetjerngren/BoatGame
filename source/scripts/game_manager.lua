@@ -64,9 +64,9 @@ local gfx <const> = pd.graphics
 
 local WaterParticleDensity = 50
 
-class('Scene').extends()
+class('GameManager').extends()
 
-function Scene:DebugMenu()
+function GameManager:DebugMenu()
 	OptionBoxVertical("*Debug*", {"Warp", "Abilites", "Cheats", "Save Game", "Clear Save Data", "Close"}, function(index, str)
 		if index == 1 then
 			local LevelNames = LDtk.get_level_names()
@@ -122,7 +122,7 @@ function Scene:DebugMenu()
 	end)
 end
 
-function Scene:init(bLoadGame)
+function GameManager:init(bLoadGame)
 	self.miniMap = pd.datastore.readImage("MiniMap/miniMap")
 	if self.miniMap then
 		self.miniMapWithHighlight = pd.datastore.readImage("MiniMap/displayMiniMap")
@@ -210,12 +210,12 @@ function Scene:init(bLoadGame)
 	end
 end
 
-function Scene:collect(entityIid)
+function GameManager:collect(entityIid)
 	self.collectedEntities[entityIid] = true
 	table.insert(self.collectedEntities, entityIid)
 end
 
-function Scene:enterRoom(door, direction)
+function GameManager:enterRoom(door, direction)
 	print("Entering room: "..door.TargetLevel)
 	local xDiff, yDiff
 	-- Position the player
@@ -268,14 +268,14 @@ function Scene:enterRoom(door, direction)
 
 end
 
-function Scene:reloadLevel()
+function GameManager:reloadLevel()
 	self:goToLevel(self.currentLevel)
 
 end
 
 local miniMapRatio = 25
 
-function Scene:updateMiniMapHighlight()
+function GameManager:updateMiniMapHighlight()
 	local levelInfo = LDtk.get_rect(self.currentLevel)
 	self.miniMapWithHighlight = self.miniMap:copy()
 	gfx.lockFocus(self.miniMapWithHighlight)
@@ -284,7 +284,7 @@ function Scene:updateMiniMapHighlight()
 	gfx.unlockFocus()
 end
 
-function Scene:updateMiniMap(level_name)
+function GameManager:updateMiniMap(level_name)
 	gfx.lockFocus(self.miniMap)
 	local levelInfo = LDtk.get_rect(level_name)
 	gfx.setColor(gfx.kColorBlack)
@@ -292,7 +292,7 @@ function Scene:updateMiniMap(level_name)
 	gfx.unlockFocus(self.miniMap)
 end
 
-function Scene:goToLevel(level_name)
+function GameManager:goToLevel(level_name)
 
 	self.currentLevel = level_name
 	if self.entityInstance then
@@ -488,16 +488,16 @@ function Scene:goToLevel(level_name)
 	end
 end
 
-function Scene:DeactivatePhysicsComponents()
+function GameManager:DeactivatePhysicsComponents()
 	self.PhysicsComponents = self.ActivePhysicsComponents
 	self.ActivePhysicsComponents = {}
 end
 
-function Scene:ActivatePhysicsComponents()
+function GameManager:ActivatePhysicsComponents()
 	self.ActivePhysicsComponents = self.PhysicsComponents
 end
 
-function Scene:UpdatePhysicsComponentsBuoyancy()
+function GameManager:UpdatePhysicsComponentsBuoyancy()
 	for i = 1, #self.ActivePhysicsComponents do
 		if self.ActivePhysicsComponents[i].bBuoyant then
 			-- local buoyancyForces = CalculateBuoyancy(self.water.height, self.ActivePhysicsComponents[i].position.y, 50, 0.3, 5.5, self.ActivePhysicsComponents[i])
@@ -511,7 +511,7 @@ function Scene:UpdatePhysicsComponentsBuoyancy()
 	end
 end
 
-function Scene:SetPhysicsComponentsPosition()
+function GameManager:SetPhysicsComponentsPosition()
 	-- for i = 1, #self.ActivePhysicsComponents do
 	-- 	if self.ActivePhysicsComponents[i].bBuoyant then
 	-- 		self.ActivePhysicsComponents[i]:setVelocity(0, 0)

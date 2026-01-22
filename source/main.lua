@@ -147,13 +147,13 @@ function MainMenuLoop()
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			SceneManager = Scene(mainMenu.loadGame)
+			SceneManager = GameManager(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		else
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			SceneManager = Scene(mainMenu.loadGame)
+			SceneManager = GameManager(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		end
 	end
@@ -172,7 +172,7 @@ function IntroLoop()
 		if not pd.isSimulator then
 			LDtk.load("levels/world.ldtk", true)
 		end
-		SceneManager = Scene(mainMenu.loadGame)
+		SceneManager = GameManager(mainMenu.loadGame)
 		pd.update = MainGameLoop
 	end
 end
