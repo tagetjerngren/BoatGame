@@ -25,7 +25,7 @@ function UI:drawAt(func, x, y)
 end
 
 function UI:clear()
-	self:setImage(gfx.image.new(400, 240))
+	self:getImage():clear(gfx.kColorClear)
 end
 
 
