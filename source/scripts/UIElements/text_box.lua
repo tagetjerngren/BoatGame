@@ -4,9 +4,9 @@ local gfx <const> = playdate.graphics
 class('TextBox').extends(gfx.sprite)
 
 function TextBox:init(message, padding, callback, heightOffset, zIndex)
-	if SceneManager then
-		SceneManager.player.bActive = false
-		SceneManager.water.bActive = false
+	if GameManagerInstance then
+		GameManagerInstance.player.bActive = false
+		GameManagerInstance.water.bActive = false
 	end
 	self.callback = callback
 
@@ -86,9 +86,9 @@ end
 function TextBox:update()
 	if pd.buttonJustReleased(pd.kButtonA) then
 		self.timer:remove()
-		if SceneManager then
-			SceneManager.player.bActive = true
-			SceneManager.water.bActive = true
+		if GameManagerInstance then
+			GameManagerInstance.player.bActive = true
+			GameManagerInstance.water.bActive = true
 		end
 		self:remove()
 		if self.callback then

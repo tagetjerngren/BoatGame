@@ -7,8 +7,8 @@ import "scripts/Misc/abilities"
 class('CheckboxMenu').extends(gfx.sprite)
 
 function CheckboxMenu:init(prompt, options, optionValues, callback)
-	SceneManager.player.bActive = false
-	SceneManager.water.bActive = false
+	GameManagerInstance.player.bActive = false
+	GameManagerInstance.water.bActive = false
 
 	self:setIgnoresDrawOffset(true)
 	self:moveTo(200, 120)
@@ -104,8 +104,8 @@ function CheckboxMenu:update()
 		print("Altered!")
 	elseif pd.buttonJustReleased(pd.kButtonB) then
 		local _, row, _ = self.grid:getSelection()
-		SceneManager.player.bActive = true
-		SceneManager.water.bActive = true
+		GameManagerInstance.player.bActive = true
+		GameManagerInstance.water.bActive = true
 		self:remove()
 		self.selection = row
 		self.callback(self.options, self.optionValues)

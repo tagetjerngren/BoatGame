@@ -7,8 +7,8 @@ import "scripts/Misc/abilities"
 class('OptionBox').extends(gfx.sprite)
 
 function OptionBox:init(prompt, options, callback)
-	SceneManager.player.bActive = false
-	SceneManager.water.bActive = false
+	GameManagerInstance.player.bActive = false
+	GameManagerInstance.water.bActive = false
 
 	self:setIgnoresDrawOffset(true)
 	self:moveTo(200, 120)
@@ -81,8 +81,8 @@ function OptionBox:update()
 		self.grid:selectPreviousColumn(true)
 	elseif pd.buttonJustReleased(pd.kButtonA) then
 		local _, _, column = self.grid:getSelection()
-		SceneManager.player.bActive = true
-		SceneManager.water.bActive = true
+		GameManagerInstance.player.bActive = true
+		GameManagerInstance.water.bActive = true
 		self:remove()
 		self.selection = column
 		self.callback(self.selection, self.options[column])

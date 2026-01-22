@@ -41,7 +41,7 @@ local sprite_update <const> = gfx.sprite.update
 local update_timers <const> = pd.timer.updateTimers
 
 UISystem = UI()
-SceneManager = nil
+GameManagerInstance = nil
 
 math.randomseed(playdate.getSecondsSinceEpoch())
 
@@ -78,48 +78,48 @@ function MainGameLoop()
 	-- with other sprites having one more frame to update even though 
 	-- they should have been deleted
 
-	if SceneManager.player.x > SceneManager.LevelWidth and SceneManager.player.PhysicsComponent.velocity.x > 0 then
-		SceneManager:enterRoom(SceneManager.player.Door, "EAST")
+	if GameManagerInstance.player.x > GameManagerInstance.LevelWidth and GameManagerInstance.player.PhysicsComponent.velocity.x > 0 then
+		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "EAST")
 		print("Went EAST!")
-	elseif SceneManager.player.x < 0 and SceneManager.player.PhysicsComponent.velocity.x < 0 then
-		SceneManager:enterRoom(SceneManager.player.Door, "WEST")
+	elseif GameManagerInstance.player.x < 0 and GameManagerInstance.player.PhysicsComponent.velocity.x < 0 then
+		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "WEST")
 		print("Went WEST!")
-	elseif SceneManager.player.y - 16 > SceneManager.LevelHeight and SceneManager.player.PhysicsComponent.velocity.y > 0 then
-		SceneManager:enterRoom(SceneManager.player.Door, "SOUTH")
-	elseif SceneManager.player.y - 16 < 0 and SceneManager.player.PhysicsComponent.velocity.y < 0 then
-		SceneManager:enterRoom(SceneManager.player.Door, "NORTH")
+	elseif GameManagerInstance.player.y - 16 > GameManagerInstance.LevelHeight and GameManagerInstance.player.PhysicsComponent.velocity.y > 0 then
+		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "SOUTH")
+	elseif GameManagerInstance.player.y - 16 < 0 and GameManagerInstance.player.PhysicsComponent.velocity.y < 0 then
+		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "NORTH")
 	end
 
-	local OverlappingPlayerSprites = SceneManager.player:overlappingSprites()
+	local OverlappingPlayerSprites = GameManagerInstance.player:overlappingSprites()
 
 	for i = 1, #OverlappingPlayerSprites do
 		if OverlappingPlayerSprites[i]:isa(DoorTrigger) and OverlappingPlayerSprites[i].bTransitionOnEnter then
 			-- NOTE: This just puts the player in EAST transition, doesn't always make sense
-			local PlayerVelocityX = SceneManager.player.PhysicsComponent.velocity.x
-			local PlayerToDoorX = OverlappingPlayerSprites[i].x - SceneManager.player.PhysicsComponent.position.x
+			local PlayerVelocityX = GameManagerInstance.player.PhysicsComponent.velocity.x
+			local PlayerToDoorX = OverlappingPlayerSprites[i].x - GameManagerInstance.player.PhysicsComponent.position.x
 			PlayerVelocityX = PlayerVelocityX / abs(PlayerVelocityX)
 			PlayerToDoorX = PlayerToDoorX / abs(PlayerToDoorX)
 
 			if PlayerVelocityX == PlayerToDoorX then
 				if PlayerVelocityX > 0 then
-					SceneManager:enterRoom(OverlappingPlayerSprites[i], "EAST")
+					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "EAST")
 					print("Went EAST!")
 				else
-					SceneManager:enterRoom(OverlappingPlayerSprites[i], "WEST")
+					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "WEST")
 					print("Went WEST!")
 				end
 			end
 		end
 	end
 
-	SceneManager:UpdatePhysicsComponentsBuoyancy()
+	GameManagerInstance:UpdatePhysicsComponentsBuoyancy()
 
 	update_timers()
 	sprite_update()
 	pd.frameTimer.updateTimers()
 
 	-- NOTE: Update camera, moved out of the player
-	SceneManager.camera:lerp(SceneManager.player.x, SceneManager.player.y, 0.2)
+	GameManagerInstance.camera:lerp(GameManagerInstance.player.x, GameManagerInstance.player.y, 0.2)
 
 	pd.drawFPS(0, 0)
 end
@@ -147,13 +147,13 @@ function MainMenuLoop()
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			SceneManager = GameManager(mainMenu.loadGame)
+			GameManagerInstance = GameManager(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		else
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			SceneManager = GameManager(mainMenu.loadGame)
+			GameManagerInstance = GameManager(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		end
 	end
@@ -172,7 +172,7 @@ function IntroLoop()
 		if not pd.isSimulator then
 			LDtk.load("levels/world.ldtk", true)
 		end
-		SceneManager = GameManager(mainMenu.loadGame)
+		GameManagerInstance = GameManager(mainMenu.loadGame)
 		pd.update = MainGameLoop
 	end
 end

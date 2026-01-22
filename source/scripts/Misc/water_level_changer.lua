@@ -26,19 +26,19 @@ function WaterLevelChanger:init(x, y, Entity)
 end
 
 function WaterLevelChanger:update()
-    if SceneManager.water.bWaterWheelPossessed then
+    if GameManagerInstance.water.bWaterWheelPossessed then
         return
     end
 
-    SceneManager.water.height += self.rateOfChange
-    for i = 1, #SceneManager.water.pointPositions do
-        SceneManager.water.pointPositions[i][2] += self.rateOfChange
+    GameManagerInstance.water.height += self.rateOfChange
+    for i = 1, #GameManagerInstance.water.pointPositions do
+        GameManagerInstance.water.pointPositions[i][2] += self.rateOfChange
     end
 
-    if SceneManager.water.height > self.minHeight then
+    if GameManagerInstance.water.height > self.minHeight then
 		self.rateOfChange = -1
 		self:setImage(self.upImage)
-	elseif SceneManager.water.height < self.maxHeight then
+	elseif GameManagerInstance.water.height < self.maxHeight then
 		self.rateOfChange = 1
 		self:setImage(self.downImage)
 	end
