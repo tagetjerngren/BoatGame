@@ -80,10 +80,8 @@ function MainGameLoop()
 
 	if GameManagerInstance.player.x > GameManagerInstance.LevelWidth and GameManagerInstance.player.PhysicsComponent.velocity.x > 0 then
 		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "EAST")
-		print("Went EAST!")
 	elseif GameManagerInstance.player.x < 0 and GameManagerInstance.player.PhysicsComponent.velocity.x < 0 then
 		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "WEST")
-		print("Went WEST!")
 	elseif GameManagerInstance.player.y - 16 > GameManagerInstance.LevelHeight and GameManagerInstance.player.PhysicsComponent.velocity.y > 0 then
 		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "SOUTH")
 	elseif GameManagerInstance.player.y - 16 < 0 and GameManagerInstance.player.PhysicsComponent.velocity.y < 0 then
@@ -91,6 +89,7 @@ function MainGameLoop()
 	end
 
 	local OverlappingPlayerSprites = GameManagerInstance.player:overlappingSprites()
+
 
 	for i = 1, #OverlappingPlayerSprites do
 		if OverlappingPlayerSprites[i]:isa(DoorTrigger) and OverlappingPlayerSprites[i].bTransitionOnEnter then
@@ -103,10 +102,18 @@ function MainGameLoop()
 			if PlayerVelocityX == PlayerToDoorX then
 				if PlayerVelocityX > 0 then
 					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "EAST")
-					print("Went EAST!")
 				else
 					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "WEST")
-					print("Went WEST!")
+				end
+			end
+		elseif OverlappingPlayerSprites[i]:isa(InteractDoorTrigger) then
+			if pd.buttonJustPressed(pd.kButtonUp) then
+				if GameManagerInstance.player:isa(Player) then 
+					if GameManagerInstance.player.bGrounded then
+						GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
+					end
+				else
+					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
 				end
 			end
 		end

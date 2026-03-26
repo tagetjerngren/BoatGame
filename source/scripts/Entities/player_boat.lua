@@ -7,9 +7,9 @@ import "scripts/Misc/physics_component"
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-class('Player').extends(gfx.sprite)
+class('PlayerBoat').extends(gfx.sprite)
 
-function Player:init(x, y, image, speed, gameManager)
+function PlayerBoat:init(x, y, image, speed, gameManager)
 	self.GameManager = gameManager
 
 	self:moveTo(x,y)
@@ -17,7 +17,7 @@ function Player:init(x, y, image, speed, gameManager)
 
 	-- NOTE: Smaller collision size to cover the boat more snugly
 	self:setCollideRect(4, 10, 26, 22)
-	self.Speed = 1
+	self.Speed = speed
 
 	self.PhysicsComponent = PhysicsComponent(x, y, 10)
 
@@ -39,15 +39,26 @@ function Player:init(x, y, image, speed, gameManager)
 
 	self.direction = 1
 
-	self.hurtSound = pd.sound.sampleplayer.new("sounds/Hurt")
-	self.PhysicsComponent.bBuoyant = false
+	self.weaponTier = 1
+	self.AbilityA = nil
+	self.AbilityB = nil
+	self.PassiveAbility = nil
 
-	self.boatImage = gfx.image.new("images/Player")
+	self.hurtSound = pd.sound.sampleplayer.new("sounds/Hurt")
+
+	self.lightRadius = 50
+
+	self.boatImage = gfx.image.new("images/Boat")
+	self.wheelBoatImage = gfx.image.new("images/WheelBoat")
 	self.currentImage = self.boatImage
-	self:setImage(self.currentImage)
+
+	self.sampleCollection = {}
+	for i = 1, 21 do
+		table.insert(self.sampleCollection, {name = "???", description = "Undiscovered", iconPath = "images/QuestionMark", worldImagePath = "images/QuestionMark"})
+	end
 end
 
-function Player:damage(amount, iFrames)
+function PlayerBoat:damage(amount, iFrames)
 	if self.Invincible > 0 then
 		return
 	end
@@ -72,12 +83,12 @@ function Player:damage(amount, iFrames)
 	end
 end
 
-function Player:knockback(force)
+function PlayerBoat:knockback(force)
 	self.PhysicsComponent:addForce(force)
 	-- self.PhysicsComponent:setVelocity(force.x, force.y)
 end
 
-function Player:Respawn()
+function PlayerBoat:Respawn()
 	self:add()
 	self.Health = self.MaxHealth
 
@@ -115,7 +126,7 @@ local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
 local FullHeartImage = gfx.image.new("images/HeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
 
-function Player:DrawHealthBar()
+function PlayerBoat:DrawHealthBar()
 	HealthImage:clear(gfx.kColorClear)
 	gfx.lockFocus(HealthImage)
 
@@ -156,11 +167,11 @@ function Player:DrawHealthBar()
 	UISystem:drawImageAt(CoinImage, 300, -40)
 end
 
-function Player:addForce(Force)
+function PlayerBoat:addForce(Force)
 	self.PhysicsComponent:addForce(Force)
 end
 
-function Player:collisionResponse(other)
+function PlayerBoat:collisionResponse(other)
 	if EntityIsCollisionGroup(other, COLLISION_GROUPS.WALL) then
 		if other:isa(BlockedWall) and other:clear(self) then
 			return "overlap"
@@ -187,9 +198,11 @@ function Player:collisionResponse(other)
 	assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
-function Player:update()
+function PlayerBoat:update()
 	local Gravity = 0.5
-	self.PhysicsComponent:addForce(0, Gravity)
+	if self.PhysicsComponent.bBuoyant or not self.bUnderwater then
+		self.PhysicsComponent:addForce(0, Gravity)
+	end
 
 	-- NOTE: This whole chunk just determines which sprite the player should be, it kind of disgusts me but I can't really think of anything better. Maybe implement a state machine and let that sort out sprite changing?
 	if self.bHasWheels and self.bGrounded then
@@ -246,27 +259,75 @@ function Player:update()
 		-- if self.PassiveAbility then
 		-- 	self:PassiveAbility()
 		-- end
---
-		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
-				self.PhysicsComponent.velocity.y = -8
+
+		local TeleportDistance = 64
+		-- NOTE: Press the same button within this many frames for it to count as a double tap
+		local TeleportDoubleTapFrames = 5
+
+		if self.bCanTeleport then
+			if pd.buttonJustPressed(pd.kButtonLeft) and self.bDoubleLeft then
+				self:moveBy(-TeleportDistance, 0)
+				local Collisions = self:overlappingSprites()
+				if #Collisions > 0 then
+					self:moveBy(TeleportDistance, 0)
+				else
+					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				end
+			elseif pd.buttonJustPressed(pd.kButtonLeft) then
+				self.bDoubleLeft = true
+				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
+					self.bDoubleLeft = false
+				end)
+			end
+
+			if pd.buttonJustPressed(pd.kButtonRight) and self.bDoubleRight then
+				self:moveBy(TeleportDistance, 0)
+				local Collisions = self:overlappingSprites()
+				if #Collisions > 0 then
+					self:moveBy(-TeleportDistance, 0)
+				else
+					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
+				end
+			elseif pd.buttonJustPressed(pd.kButtonRight) then
+				self.bDoubleRight = true
+				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
+					self.bDoubleRight = false
+				end)
+			end
+		end
+
+		if self.bGrounded and not self.bHasWheels then
+			if pd.buttonJustPressed(pd.kButtonLeft) then
+				self:setImageFlip(gfx.kImageFlippedX)
+				self.direction = -1
+				self.PhysicsComponent:addForce(-1, 0)
+			end
+
+			if pd.buttonJustPressed(pd.kButtonRight) then
+				self:setImageFlip(gfx.kImageUnflipped)
+				self.direction = 1
+				self.PhysicsComponent:addForce(1, 0)
+			end
 		end
 
 		if pd.buttonIsPressed(pd.kButtonLeft) then
 			self:setImageFlip(gfx.kImageFlippedX)
 			self.direction = -1
-			-- if (self.bGrounded) then
-				-- self.PhysicsComponent.velocity.x = -self.Speed
-				self.PhysicsComponent:addForce(-self.Speed, 0)
-			-- end
+			if ((not self.bGrounded) or self.bHasWheels) then
+				self.PhysicsComponent.velocity.x = -self.Speed
+			end
 		end
 
 		if pd.buttonIsPressed(pd.kButtonRight) then
 			self.direction = 1
 			self:setImageFlip(gfx.kImageUnflipped)
-			-- if (self.bGrounded) then
-				-- self.PhysicsComponent.velocity.x = self.Speed
-				self.PhysicsComponent:addForce(self.Speed, 0)
-			-- end
+			if ((not self.bGrounded) or self.bHasWheels) then
+				self.PhysicsComponent.velocity.x = self.Speed
+			end
+		end
+
+		if self.bHasSubmerge then
+			DoSubmerge(self)
 		end
 	end
 
@@ -284,6 +345,25 @@ function Player:update()
 		end
 	end
 
+	if pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
+		self.GameManager.player:remove()
+		self.GameManager.player = Player(self.x, self.y - 0, gfx.image.new("images/Player"), 5, self.GameManager)
+		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
+
+		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)
+		self.GameManager.player:add()
+		self.GameManager.unoccupiedBoat:add()
+
+		-- TODO: This loop and comparing feels pretty bad, make the array a map instead so it's easier to grab specific objects
+		for i, v in ipairs(self.GameManager.ActivePhysicsComponents) do
+			if v == self.PhysicsComponent then
+				table.remove(self.GameManager.ActivePhysicsComponents, i)
+				break
+			end
+		end
+		self:remove()
+	end
+
 	self:DrawHealthBar()
 
 	if self.Invincible > 0 then
@@ -291,17 +371,17 @@ function Player:update()
 	end
 end
 
-function Player:setAbilityA(func, name)
+function PlayerBoat:setAbilityA(func, name)
 	self.AbilityA = func
 	self.AbilityAName = name
 end
 
-function Player:setAbilityB(func, name)
+function PlayerBoat:setAbilityB(func, name)
 	self.AbilityB = func
 	self.AbilityBName = name
 end
 
-function Player:setPassive(func, name)
+function PlayerBoat:setPassive(func, name)
 	self.PassiveAbility = func
 	self.PassiveAbilityName = name
 end

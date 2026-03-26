@@ -21,19 +21,30 @@ function DpadNotif:init(x, y, width, height)
 	self:add()
 
 	self.bCollected = false
+
+	-- TODO: Reconsider this implementation
+	self.bPlayerMustBeGrounded = true
 end
 
 function DpadNotif:update()
 	local spritesInArea = self:overlappingSprites()
 	local bPlayerInRect = false
+	local player = nil
 	for _, value in ipairs(spritesInArea) do
-		if value:isa(Player) then
+		if value:isa(Player) or value:isa(PlayerBoat) then
 			bPlayerInRect = true
+			player = value
 		end
 	end
 
 	if bPlayerInRect then
-		-- self.animationLoop:draw(self.x + 16, self.y - 16)
-		UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.width / 2 - 16, self.y - 32)
+		if player:isa(Player) and self.bPlayerMustBeGrounded then
+			if player.bGrounded then
+				UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.width / 2 - 16, self.y - 32)
+			end
+		else
+			-- self.animationLoop:draw(self.x + 16, self.y - 16)
+			UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.width / 2 - 16, self.y - 32)
+		end
 	end
 end

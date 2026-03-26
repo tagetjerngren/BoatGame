@@ -35,6 +35,7 @@ import "scripts/Entities/Mechanics/darkness"
 import "scripts/Entities/Mechanics/detector"
 import "scripts/Entities/Mechanics/door"
 import "scripts/Entities/Mechanics/door_trigger"
+import "scripts/Entities/Mechanics/interact_door"
 import "scripts/Entities/Mechanics/foliage"
 import "scripts/Entities/Mechanics/moving_platform"
 import "scripts/Entities/Mechanics/one_way_door"
@@ -49,6 +50,8 @@ import "scripts/Entities/NPCs/the_upgrader"
 
 -- NOTE: Misc
 import "scripts/Entities/player"
+import "scripts/Entities/player_boat"
+import "scripts/Entities/unoccupied_boat"
 import "scripts/Entities/Misc/save_point"
 import "scripts/Entities/Misc/plant"
 import "scripts/Entities/Misc/sample"
@@ -85,12 +88,14 @@ function GameManager:DebugMenu()
 			local AbilityNames = {
 				"Water Wheel",
 				"Teleport Device",
+				"Lantern",
 				"Change Size Device",
 				"Wheels"
 			}
 			local AbilityActive = {
 				self.water.bWaterWheelPossessed,
 				self.player.bCanTeleport,
+				self.player.lightRadius == 200,
 				self.player.bHasChangeSizeDevice,
 				self.player.bHasWheels
 			}
@@ -98,8 +103,9 @@ function GameManager:DebugMenu()
 			CheckboxMenu("*Abilities*", AbilityNames, AbilityActive, function(options, values)
 				self.water.bWaterWheelPossessed = values[1]
 				self.player.bCanTeleport = values[2]
-				self.player.bHasChangeSizeDevice = values[3]
-				self.player.bHasWheels = values[4]
+				if values[3] then self.player.lightRadius = 200 else self.player.lightRadius = 50 end
+				self.player.bHasChangeSizeDevice = values[4]
+				self.player.bHasWheels = values[5]
 				self:DebugMenu()
 			end)
 		elseif index == 3 then
@@ -131,21 +137,6 @@ function GameManager:init(bLoadGame)
 		self.miniMapWithHighlight = self.miniMap:copy()
 	end
 
-	self.menu = pd.getSystemMenu()
-
-
-	self.menuItem, self.error = self.menu:addMenuItem("Swap Crank", function()
-		self.water.bOldSystem = not self.water.bOldSystem
-	end)
-
-	self.menuItem2, error = self.menu:addMenuItem("View Samples", function ()
-		self:DeactivatePhysicsComponents()
-		CollectionMenu(self)
-	end)
-
-	self.menuItem3, _ = self.menu:addMenuItem("Debug Menu", function()
-		self:DebugMenu()
-	end)
 
 	self.ActivePhysicsComponents = {}
 
@@ -196,18 +187,48 @@ function GameManager:init(bLoadGame)
 			self.player.sampleCollection = SaveData["SampleCollection"]
 		end
 	else
+		local StartLevel = "Starting_Area"
+
 		self.collectedEntities = {}
 		self.player = Player(0, 0, gfx.image.new("images/Boat"), 5, self)
 		local level_rect = LDtk.get_rect("Starting_Area")
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
 		self.water = Water(100, self.LevelWidth, 0, self.LevelHeight, 0.1, WaterParticleDensity)
-		self:goToLevel("Starting_Area")
+		self.unoccupiedBoat = UnoccupiedBoat(0, 0, self, StartLevel)
+
+		self:goToLevel(StartLevel)
+
 		self.player:moveTo(self.SpawnX, self.SpawnY)
 		self.player.PhysicsComponent:setPosition(self.SpawnX, self.SpawnY)
+
+		self.unoccupiedBoat:moveTo(self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
+		self.unoccupiedBoat.notif:moveTo(self.UnoccupiedBoatSpawnX - 32, self.UnoccupiedBoatSpawnY - 32)
+		self.unoccupiedBoat.PhysicsComponent:setPosition(self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
+
 		self.camera:center(self.player.x, self.player.y)
 		-- self.water.height = self.SpawnY
-		self.water:SetHeight(self.SpawnY)
+		self.water:SetHeight(self.UnoccupiedBoatSpawnY)
 	end
+
+	self.menu = pd.getSystemMenu()
+
+
+	-- self.menuItem, self.error = self.menu:addMenuItem("Swap Crank", function()
+	-- 	self.water.bOldSystem = not self.water.bOldSystem
+	-- end)
+
+	self.menuItem, self.error = self.menu:addCheckmarkMenuItem("Old Crank", self.water.bOldSystem, function(value)
+		self.water.bOldSystem = value
+	end)
+
+	self.menuItem2, error = self.menu:addMenuItem("View Samples", function ()
+		self:DeactivatePhysicsComponents()
+		CollectionMenu(self)
+	end)
+
+	self.menuItem3, _ = self.menu:addMenuItem("Debug Menu", function()
+		self:DebugMenu()
+	end)
 end
 
 function GameManager:collect(entityIid)
@@ -216,7 +237,6 @@ function GameManager:collect(entityIid)
 end
 
 function GameManager:enterRoom(door, direction)
-	print("Entering room: "..door.TargetLevel)
 	local xDiff, yDiff
 	-- Position the player
 	if direction == "EAST" or direction == "WEST" then
@@ -293,7 +313,6 @@ function GameManager:updateMiniMap(level_name)
 end
 
 function GameManager:goToLevel(level_name)
-
 	self.currentLevel = level_name
 	if self.entityInstance then
 		for _, entity in pairs(self.entityInstance) do
@@ -306,6 +325,12 @@ function GameManager:goToLevel(level_name)
 	self.player:add()
 	self.water:add()
 	self.ui:add()
+
+	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
+		self.unoccupiedBoat:add()
+		self.unoccupiedBoat.notif:add()
+	end
+
 	if self.playerCorpse and self.playerCorpse.level == level_name then
 		self.playerCorpse:add()
 	end
@@ -324,6 +349,10 @@ function GameManager:goToLevel(level_name)
 	self.ActivePhysicsComponents = {}
 	table.insert(self.ActivePhysicsComponents, self.player.PhysicsComponent)
 
+	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
+		table.insert(self.ActivePhysicsComponents, self.unoccupiedBoat.PhysicsComponent)
+	end
+
 	-- NOTE: This adds in all of the tiles and their collisions
 	for layer_name, layer in pairs(LDtk.get_layers(level_name)) do
 		if layer.tiles then
@@ -332,7 +361,7 @@ function GameManager:goToLevel(level_name)
 			layerSprite:setTilemap(tilemap)
 			layerSprite:setCenter(0,0)
 			layerSprite:moveTo(0,0)
-			layerSprite:setZIndex(layer.zIndex)
+			layerSprite:setZIndex(-10)
 			layerSprite:add()
 
 			local emptyTiles = LDtk.get_empty_tileIDs(level_name, "Solid", layer_name)
@@ -354,6 +383,8 @@ function GameManager:goToLevel(level_name)
 
 		if entityName == "RoomTransition" then
 			self.entityInstance[entity.iid] = DoorTrigger(entityX, entityY, entity)
+		elseif entityName == "InteractDoor" then
+			self.entityInstance[entity.iid] = InteractDoorTrigger(entityX, entityY, entity)
 		elseif entityName == "Mine" then
 			local MineInstance = Mine(entityX, entityY)
 			table.insert(self.ActivePhysicsComponents, MineInstance.PhysicsComponent)
@@ -365,6 +396,9 @@ function GameManager:goToLevel(level_name)
 		elseif entityName == "SpawnPoint" then
 			self.SpawnX = entityX + 16
 			self.SpawnY = entityY + 32
+		elseif entityName == "UnoccupiedBoat" then
+			self.UnoccupiedBoatSpawnX = entityX + 16
+			self.UnoccupiedBoatSpawnY = entityY + 32
 		elseif entityName == "AbilityPickup" and not self.collectedEntities[entity.iid] then
 			self.entityInstance[entity.iid] = AbilityPickup(entityX, entityY, entity)
 		elseif entityName == "WaterWheel" then
