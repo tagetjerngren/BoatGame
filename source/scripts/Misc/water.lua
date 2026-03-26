@@ -16,7 +16,7 @@ function Water:init(Height, Width, LowerBound, UpperBound, RateOfChange, Distanc
 	self.upperBound = UpperBound
 	self.rateOfChange = RateOfChange
 
-	self.bActive = false
+	self.bActive = true
 	self.bWaterWheelPossessed = false
 
 	self.pointPositions = {}
@@ -199,12 +199,14 @@ function Water:update()
 		end
 	end
 
-	if pd.buttonIsPressed(pd.kButtonB) then
-		self:Poke(40, 1)
-	end
-	if pd.buttonIsPressed(pd.kButtonA) then
-		self:Poke(40, -1)
-	end
+	-- NOTE: Debug option
+	-- if pd.buttonIsPressed(pd.kButtonB) then
+	-- 	self:Poke(40, 1)
+	-- end
+	-- if pd.buttonIsPressed(pd.kButtonA) then
+	-- 	self:Poke(40, -1)
+	-- end
+
 	self:Spring()
 	self:UpdateWaves()
 
