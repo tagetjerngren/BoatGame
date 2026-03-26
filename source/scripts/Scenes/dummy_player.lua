@@ -11,7 +11,8 @@ class('DummyPlayer').extends(gfx.sprite)
 
 function DummyPlayer:init(x, y, image, speed)
 	self:moveTo(x,y)
-	self:setImage(image)
+	self.boatImage = gfx.image.new("images/PlayerBoat")
+	self:setImage(self.boatImage)
 
 	-- NOTE: Smaller collision size to cover the boat more snugly
 	self:setCollideRect(4, 10, 26, 22)
@@ -29,7 +30,7 @@ function DummyPlayer:init(x, y, image, speed)
 
 	self.direction = 1
 
-	self.boatImage = gfx.image.new("images/Boat")
+	self.boatImage = gfx.image.new("images/PlayerBoat")
 	self.currentImage = self.boatImage
 end
 
