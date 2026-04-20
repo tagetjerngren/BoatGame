@@ -42,6 +42,10 @@ function Player:init(x, y, image, speed, gameManager)
 	self.hurtSound = pd.sound.sampleplayer.new("sounds/Hurt")
 	self.PhysicsComponent.bBuoyant = false
 
+	local frameTime = 100
+	local animationImageTable = gfx.imagetable.new("images/PlayerWalk")
+	self.animationLoop = gfx.animation.loop.new(frameTime, animationImageTable, true)
+
 	self.boatImage = gfx.image.new("images/Player")
 	self.currentImage = self.boatImage
 	self:setImage(self.currentImage)
@@ -310,6 +314,41 @@ function Player:update()
 		if PlayerLeft < 0 then
 			self:moveTo(HalfWidth, self.y)
 			self.PhysicsComponent.position.x = HalfWidth
+		end
+	end
+
+	-- NOTE: Figuring out player state
+	-- TODO: MAKE THIS NOT BE BASED ON STRINGS; SHOULD PROBABLY BE AN ENUM
+	if not self.bGrounded then
+		self.state = "In air"
+	else
+		if abs(self.PhysicsComponent.velocity.x) < 0.1 then
+			self.state = "Standing"
+		else
+			self.state = "Walking"
+		end
+	end
+
+	print(self.state)
+
+	-- NOTE: SETTING THE PLAYER IMAGE
+	if self.state == "In air" then
+		self:setImage(gfx.image.new("images/PlayerJump"))
+		if self.direction == -1 then
+			self:setImageFlip(gfx.kImageFlippedX)
+		end
+	elseif self.state == "Standing" then
+		self:setImage(gfx.image.new("images/Player"))
+		if self.direction == -1 then
+			self:setImageFlip(gfx.kImageFlippedX)
+		end
+	elseif self.state == "Walking" then
+		self:setImage(gfx.image.new(32, 32))
+		gfx.lockFocus(self:getImage())
+		self.animationLoop:draw(0, 0)
+		gfx.unlockFocus()
+		if self.direction == -1 then
+			self:setImageFlip(gfx.kImageFlippedX)
 		end
 	end
 
