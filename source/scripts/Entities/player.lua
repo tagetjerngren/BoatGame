@@ -284,6 +284,35 @@ function Player:update()
 		end
 	end
 
+	local bCollidingWithDoorTrigger = false
+
+	local CollidingWithSprites = self:overlappingSprites()
+	for _, sprite in ipairs(CollidingWithSprites) do
+		if sprite:isa(DoorTrigger) or sprite:isa(InteractDoorTrigger) then
+			bCollidingWithDoorTrigger = true
+			break
+		end
+	end
+
+	-- NOTE: KEEPS THE PLAYER WITHIN THE LEVEL UNLESS THEY ARE COLLIDING WITH A DOOR
+	if not bCollidingWithDoorTrigger then
+		local PlayerCollideRect = self:getCollideRect()
+		local HalfWidth = PlayerCollideRect.width / 2
+
+		local PlayerLeft = self.x - HalfWidth
+		local PlayerRight = self.x + HalfWidth
+
+		if PlayerRight > self.GameManager.LevelWidth then
+			self:moveTo(self.GameManager.LevelWidth - HalfWidth, self.y)
+			self.PhysicsComponent.position.x = self.GameManager.LevelWidth - HalfWidth
+		end
+
+		if PlayerLeft < 0 then
+			self:moveTo(HalfWidth, self.y)
+			self.PhysicsComponent.position.x = HalfWidth
+		end
+	end
+
 	self:DrawHealthBar()
 
 	if self.Invincible > 0 then
