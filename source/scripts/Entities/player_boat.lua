@@ -347,7 +347,7 @@ function PlayerBoat:update()
 
 	if pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
 		self.GameManager.player:remove()
-		self.GameManager.player = Player(self.x, self.y - 0, gfx.image.new("images/Player"), 5, self.GameManager)
+		self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
 
 		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)

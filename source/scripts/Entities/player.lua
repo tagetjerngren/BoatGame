@@ -1,3 +1,9 @@
+PLAYER_STATES = {
+	IN_AIR = 1,
+	STANDING = 2,
+	WALKING = 3
+}
+
 import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 import "CoreLibs/animation"
@@ -9,11 +15,10 @@ local gfx <const> = pd.graphics
 
 class('Player').extends(gfx.sprite)
 
-function Player:init(x, y, image, speed, gameManager)
+function Player:init(x, y, gameManager)
 	self.GameManager = gameManager
 
 	self:moveTo(x,y)
-	self:setImage(image)
 
 	-- NOTE: Smaller collision size to cover the boat more snugly
 	self:setCollideRect(4, 10, 26, 22)
@@ -42,12 +47,14 @@ function Player:init(x, y, image, speed, gameManager)
 	self.hurtSound = pd.sound.sampleplayer.new("sounds/Hurt")
 	self.PhysicsComponent.bBuoyant = false
 
-	local frameTime = 100
+	local frameTime = 150
 	local animationImageTable = gfx.imagetable.new("images/PlayerWalk")
 	self.animationLoop = gfx.animation.loop.new(frameTime, animationImageTable, true)
 
-	self.boatImage = gfx.image.new("images/Player")
-	self.currentImage = self.boatImage
+	self.playerImage = gfx.image.new("images/Player")
+	self.playerJumpImage = gfx.image.new("images/PlayerJump")
+	self.playerWalkingImage = gfx.image.new(32, 32)
+	self.currentImage = self.playerImage
 	self:setImage(self.currentImage)
 end
 
@@ -195,26 +202,6 @@ function Player:update()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity)
 
-	-- NOTE: This whole chunk just determines which sprite the player should be, it kind of disgusts me but I can't really think of anything better. Maybe implement a state machine and let that sort out sprite changing?
-	if self.bHasWheels and self.bGrounded then
-		if self.currentImage ~= self.wheelBoatImage then
-			self:setImage(self.wheelBoatImage)
-			self.currentImage = self.wheelBoatImage
-			if self.direction == -1 then
-				self:setImageFlip(gfx.kImageFlippedX)
-			end
-		end
-	else
-		if self.currentImage ~= self.boatImage then
-			self:setImage(self.boatImage)
-			self.currentImage = self.boatImage
-			if self.direction == -1 then
-				self:setImageFlip(gfx.kImageFlippedX)
-			end
-		end
-	end
-
-
 	if self.bHasInterest then
 		DoInterest(self)
 	end
@@ -228,7 +215,6 @@ function Player:update()
 	end
 
 	if self.bActive then
-
 		if pd.buttonJustPressed(pd.kButtonUp) then
 			local CollidingWithSprites = self:overlappingSprites()
 			for _, sprite in ipairs(CollidingWithSprites) do
@@ -242,15 +228,6 @@ function Player:update()
 			self:AbilityA(pd.kButtonA)
 		end
 
-		-- NOTE: I've decided that only the weapon will be an optionable upgrade, otherwise there is just too much world to make, I still sort of like the idea but it would need more work than I'm willing to implement
-		-- if self.AbilityB then
-		-- 	self:AbilityB(pd.kButtonB)
-		-- end
-
-		-- if self.PassiveAbility then
-		-- 	self:PassiveAbility()
-		-- end
---
 		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
 				self.PhysicsComponent.velocity.y = -8
 		end
@@ -318,32 +295,32 @@ function Player:update()
 	end
 
 	-- NOTE: Figuring out player state
-	-- TODO: MAKE THIS NOT BE BASED ON STRINGS; SHOULD PROBABLY BE AN ENUM
 	if not self.bGrounded then
-		self.state = "In air"
+		self.state = PLAYER_STATES.IN_AIR
 	else
 		if abs(self.PhysicsComponent.velocity.x) < 0.1 then
-			self.state = "Standing"
+			self.state = PLAYER_STATES.STANDING
 		else
-			self.state = "Walking"
+			self.state = PLAYER_STATES.WALKING
 		end
 	end
 
 	print(self.state)
 
 	-- NOTE: SETTING THE PLAYER IMAGE
-	if self.state == "In air" then
-		self:setImage(gfx.image.new("images/PlayerJump"))
+	if self.state == PLAYER_STATES.IN_AIR then
+		self:setImage(self.playerJumpImage)
 		if self.direction == -1 then
 			self:setImageFlip(gfx.kImageFlippedX)
 		end
-	elseif self.state == "Standing" then
-		self:setImage(gfx.image.new("images/Player"))
+	elseif self.state == PLAYER_STATES.STANDING then
+		self:setImage(self.playerImage)
 		if self.direction == -1 then
 			self:setImageFlip(gfx.kImageFlippedX)
 		end
-	elseif self.state == "Walking" then
-		self:setImage(gfx.image.new(32, 32))
+	elseif self.state == PLAYER_STATES.WALKING then
+		self.playerWalkingImage:clear(gfx.kColorClear)
+		self:setImage(self.playerWalkingImage)
 		gfx.lockFocus(self:getImage())
 		self.animationLoop:draw(0, 0)
 		gfx.unlockFocus()
