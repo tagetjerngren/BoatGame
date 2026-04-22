@@ -15,7 +15,7 @@ end
 function SpikeBall:update()
 	local collisions = gfx.sprite.querySpritesInRect(self.x - 8, self.y - 8, 16, 16)
 	for _, collision in ipairs(collisions) do
-		if collision:isa(Player) then
+		if collision:isa(Player) or collision:isa(PlayerBoat) then
 			collision:damage(1, 10)
 			collision:knockback(pd.geometry.vector2D.new(collision.x - self.x, collision.y - self.y):normalized() * 10)
 			-- collision.PhysicsComponent:AddForce(collision.x - self.x, collision.y - self.y)
