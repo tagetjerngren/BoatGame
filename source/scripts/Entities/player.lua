@@ -21,8 +21,18 @@ function Player:init(x, y, gameManager)
 	self:moveTo(x,y)
 
 	-- NOTE: Smaller collision size to cover the boat more snugly
-	self:setCollideRect(4, 10, 26, 22)
-	self.Speed = 1
+	-- self:setCollideRect(4, 10, 26, 22)
+	self:setCollideRect(8, 4, 32 - 8 * 2, 32 - 4)
+
+	self.maxAcceleration = 1
+	self.maxDeceleration = 0.5
+	self.maxTurnSpeed = 1.3
+
+	self.maxAirAcceleration = 0.5
+	self.maxAirDeceleration = 0.1
+	self.maxAirTurnSpeed = 0.6
+
+	self.MaxSpeed = 4
 
 	self.PhysicsComponent = PhysicsComponent(x, y, 10)
 
@@ -232,34 +242,54 @@ function Player:update()
 				self.PhysicsComponent.velocity.y = -8
 		end
 
+		local acceleration = self.bGrounded and self.maxAcceleration or self.maxAirAcceleration
+		local deceleration = self.bGrounded and self.maxDeceleration or self.maxAirDeceleration
+		local turnSpeed = self.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
+
+		local desiredVelocity = 0
+
+		if pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
+			self.animationLoop.frame = 2
+		end
+
 		if pd.buttonIsPressed(pd.kButtonLeft) then
 			self:setImageFlip(gfx.kImageFlippedX)
 			self.direction = -1
-			-- if (self.bGrounded) then
-				-- self.PhysicsComponent.velocity.x = -self.Speed
-				self.PhysicsComponent:addForce(-self.Speed, 0)
-			-- end
+				desiredVelocity = -self.MaxSpeed
 		end
 
 		if pd.buttonIsPressed(pd.kButtonRight) then
 			self.direction = 1
 			self:setImageFlip(gfx.kImageUnflipped)
-			-- if (self.bGrounded) then
-				-- self.PhysicsComponent.velocity.x = self.Speed
-				self.PhysicsComponent:addForce(self.Speed, 0)
-			-- end
+				desiredVelocity = self.MaxSpeed
+		end
+
+		local maxSpeedChange
+
+		if desiredVelocity ~= 0 then
+			if desiredVelocity/abs(desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
+				maxSpeedChange = turnSpeed
+			else
+				maxSpeedChange = acceleration
+			end
+		else
+			maxSpeedChange = deceleration
+		end
+
+		if abs(desiredVelocity - self.PhysicsComponent.velocity.x) ~= 0 then
+			-- NOTE: THIS PREVENTS OVERSHOOT
+			 maxSpeedChange = abs(desiredVelocity - self.PhysicsComponent.velocity.x) < maxSpeedChange and abs(desiredVelocity - self.PhysicsComponent.velocity.x) or maxSpeedChange
+			self.PhysicsComponent.velocity.x += ((desiredVelocity - self.PhysicsComponent.velocity.x) / abs(desiredVelocity - self.PhysicsComponent.velocity.x)) * maxSpeedChange
 		end
 	end
 
-	self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
+	print("Actual Velocity"..self.PhysicsComponent.velocity.x)
+	-- self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
 
 	self.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > self.GameManager.water.height
 	for i = 1, #collisions do
-		if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then
-			self:damage(1, 15)
-		end
 		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
 			self.bGrounded = true
 		end
