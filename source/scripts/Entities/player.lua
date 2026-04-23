@@ -34,6 +34,12 @@ function Player:init(x, y, gameManager)
 
 	self.MaxSpeed = 4
 
+	self.jumpHeight = 60
+	self.timeToJumpApex = 10
+
+	self.gravityScale = 1
+	self.gravMultiplier = 1
+
 	self.PhysicsComponent = PhysicsComponent(x, y, 10)
 
 	self.bUnderwater = false
@@ -117,7 +123,6 @@ function Player:Respawn()
 	self.PhysicsComponent.velocity = pd.geometry.vector2D.new(0, 0)
 	self.PhysicsComponent.acceleration = pd.geometry.vector2D.new(0, 0)
 
-	-- self.GameManager.water.height = self.y
 	self.GameManager.water:SetHeight(self.y)
 
 	self.GameManager.camera:center(self.x, self.y)
@@ -208,84 +213,7 @@ function Player:collisionResponse(other)
 	assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
-function Player:update()
-	local Gravity = 0.5
-	self.PhysicsComponent:addForce(0, Gravity)
-
-	if self.bHasInterest then
-		DoInterest(self)
-	end
-
-	if self.bHasInvisibilityDevice then
-		Invisibility(self, pd.kButtonB)
-	end
-
-	if self.bHasChangeSizeDevice then
-		ChangeSize(self, pd.kButtonA)
-	end
-
-	if self.bActive then
-		if pd.buttonJustPressed(pd.kButtonUp) then
-			local CollidingWithSprites = self:overlappingSprites()
-			for _, sprite in ipairs(CollidingWithSprites) do
-				if sprite.interact then
-					sprite:interact(self)
-				end
-			end
-		end
-
-		if self.AbilityA then
-			self:AbilityA(pd.kButtonA)
-		end
-
-		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
-				self.PhysicsComponent.velocity.y = -8
-		end
-
-		local acceleration = self.bGrounded and self.maxAcceleration or self.maxAirAcceleration
-		local deceleration = self.bGrounded and self.maxDeceleration or self.maxAirDeceleration
-		local turnSpeed = self.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
-
-		local desiredVelocity = 0
-
-		if pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
-			self.animationLoop.frame = 2
-		end
-
-		if pd.buttonIsPressed(pd.kButtonLeft) then
-			self:setImageFlip(gfx.kImageFlippedX)
-			self.direction = -1
-				desiredVelocity = -self.MaxSpeed
-		end
-
-		if pd.buttonIsPressed(pd.kButtonRight) then
-			self.direction = 1
-			self:setImageFlip(gfx.kImageUnflipped)
-				desiredVelocity = self.MaxSpeed
-		end
-
-		local maxSpeedChange
-
-		if desiredVelocity ~= 0 then
-			if desiredVelocity/abs(desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
-				maxSpeedChange = turnSpeed
-			else
-				maxSpeedChange = acceleration
-			end
-		else
-			maxSpeedChange = deceleration
-		end
-
-		if abs(desiredVelocity - self.PhysicsComponent.velocity.x) ~= 0 then
-			-- NOTE: THIS PREVENTS OVERSHOOT
-			 maxSpeedChange = abs(desiredVelocity - self.PhysicsComponent.velocity.x) < maxSpeedChange and abs(desiredVelocity - self.PhysicsComponent.velocity.x) or maxSpeedChange
-			self.PhysicsComponent.velocity.x += ((desiredVelocity - self.PhysicsComponent.velocity.x) / abs(desiredVelocity - self.PhysicsComponent.velocity.x)) * maxSpeedChange
-		end
-	end
-
-	print("Actual Velocity"..self.PhysicsComponent.velocity.x)
-	-- self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
-
+function Player:calculateGrounded()
 	self.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > self.GameManager.water.height
@@ -294,7 +222,9 @@ function Player:update()
 			self.bGrounded = true
 		end
 	end
+end
 
+function Player:keepPlayerWithinMap()
 	local bCollidingWithDoorTrigger = false
 
 	local CollidingWithSprites = self:overlappingSprites()
@@ -323,8 +253,9 @@ function Player:update()
 			self.PhysicsComponent.position.x = HalfWidth
 		end
 	end
+end
 
-	-- NOTE: Figuring out player state
+function Player:calculateState()
 	if not self.bGrounded then
 		self.state = PLAYER_STATES.IN_AIR
 	else
@@ -334,10 +265,9 @@ function Player:update()
 			self.state = PLAYER_STATES.WALKING
 		end
 	end
+end
 
-	print(self.state)
-
-	-- NOTE: SETTING THE PLAYER IMAGE
+function Player:setPlayerImage()
 	if self.state == PLAYER_STATES.IN_AIR then
 		self:setImage(self.playerJumpImage)
 		if self.direction == -1 then
@@ -358,25 +288,123 @@ function Player:update()
 			self:setImageFlip(gfx.kImageFlippedX)
 		end
 	end
+end
+
+function Player:handleWalk()
+	local acceleration = self.bGrounded and self.maxAcceleration or self.maxAirAcceleration
+	local deceleration = self.bGrounded and self.maxDeceleration or self.maxAirDeceleration
+	local turnSpeed = self.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
+
+	local desiredVelocity = 0
+
+	if pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
+		self.animationLoop.frame = 2
+	end
+
+	if pd.buttonIsPressed(pd.kButtonLeft) then
+		self:setImageFlip(gfx.kImageFlippedX)
+		self.direction = -1
+			desiredVelocity = -self.MaxSpeed
+	end
+
+	if pd.buttonIsPressed(pd.kButtonRight) then
+		self.direction = 1
+		self:setImageFlip(gfx.kImageUnflipped)
+			desiredVelocity = self.MaxSpeed
+	end
+
+	local maxSpeedChange
+
+	if desiredVelocity ~= 0 then
+		if desiredVelocity/abs(desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
+			maxSpeedChange = turnSpeed
+		else
+			maxSpeedChange = acceleration
+		end
+	else
+		maxSpeedChange = deceleration
+	end
+
+	if abs(desiredVelocity - self.PhysicsComponent.velocity.x) ~= 0 then
+		-- NOTE: THIS PREVENTS OVERSHOOT
+		 maxSpeedChange = abs(desiredVelocity - self.PhysicsComponent.velocity.x) < maxSpeedChange and abs(desiredVelocity - self.PhysicsComponent.velocity.x) or maxSpeedChange
+		self.PhysicsComponent.velocity.x += ((desiredVelocity - self.PhysicsComponent.velocity.x) / abs(desiredVelocity - self.PhysicsComponent.velocity.x)) * maxSpeedChange
+	end
+end
+
+function Player:jump(gravity)
+	self.bDesireJump = false
+	print("JUMP!")
+
+	if self.bGrounded then
+		local jumpSpeed = math.sqrt(2 * gravity * self.gravityScale * self.jumpHeight)
+
+		if self.PhysicsComponent.velocity.y > 0 then
+			jumpSpeed = math.max(jumpSpeed - self.PhysicsComponent.velocity.y, 0)
+		elseif self.PhysicsComponent.velocity.y < 0 then
+			jumpSpeed = math.abs(self.PhysicsComponent.velocity.y)
+		end
+
+		print("Jump Speed: "..jumpSpeed)
+		self.PhysicsComponent.velocity.y -= jumpSpeed
+	end
+end
+
+function Player:update()
+	local Gravity = 0.5
+	self.PhysicsComponent:addForce(0, Gravity * self.gravityScale)
+	print("Gravity: "..Gravity * self.gravityScale)
+
+	if self.bActive then
+		if pd.buttonJustPressed(pd.kButtonUp) then
+			local CollidingWithSprites = self:overlappingSprites()
+			for _, sprite in ipairs(CollidingWithSprites) do
+				if sprite.interact then
+					sprite:interact(self)
+				end
+			end
+		end
+
+		-- if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
+		if pd.buttonJustPressed(pd.kButtonA) then
+			-- self.bDesireJump = true
+			self.PhysicsComponent.velocity.y = -8
+		end
+
+		-- local newGravity = (2 * self.jumpHeight) / (self.timeToJumpApex * self.timeToJumpApex)
+		-- self.gravityScale = (newGravity / Gravity) * self.gravMultiplier
+		--
+		-- if self.bDesireJump then
+		-- 	self:jump(Gravity)
+		-- else
+		-- 	if self.PhysicsComponent.velocity.y == 0 then
+		-- 		self.gravMultiplier = 1
+		-- 	elseif self.PhysicsComponent.velocity.y > 0.01 then
+		-- 		local downwardMovementMultiplier = 0.3
+		-- 		self.gravMultiplier = downwardMovementMultiplier
+		-- 	end
+		-- end
+
+		self:handleWalk()
+	end
+
+	-- print("Actual Velocity"..self.PhysicsComponent.velocity.x)
+
+	self:calculateGrounded()
+
+	self:keepPlayerWithinMap()
+
+	-- NOTE: Figuring out player state
+	self:calculateState()
+
+	-- print(self.state)
+
+	-- NOTE: SETTING THE PLAYER IMAGE
+	self:setPlayerImage()
 
 	self:DrawHealthBar()
 
 	if self.Invincible > 0 then
 		self.Invincible -= 1
 	end
-end
-
-function Player:setAbilityA(func, name)
-	self.AbilityA = func
-	self.AbilityAName = name
-end
-
-function Player:setAbilityB(func, name)
-	self.AbilityB = func
-	self.AbilityBName = name
-end
-
-function Player:setPassive(func, name)
-	self.PassiveAbility = func
-	self.PassiveAbilityName = name
 end
