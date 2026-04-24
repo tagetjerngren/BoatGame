@@ -26,7 +26,7 @@ function Coin:update()
 	self:moveTo(self.x, self.y + 0.1 * math.cos(5 * pd.getElapsedTime()))
 end
 
-function Coin:pickup(player)
+function Coin:collect(player)
 	player.coins += 1
 	player.GameManager:collect(self.entity.iid)
 	self.entity.fields.Collected = true

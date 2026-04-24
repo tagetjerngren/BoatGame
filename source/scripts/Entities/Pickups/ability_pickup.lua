@@ -15,7 +15,7 @@ function AbilityPickup:init(x, y, entity)
 	self:add()
 end
 
-function AbilityPickup:pickup(player)
+function AbilityPickup:collect(player)
 	player.bActive = false
 	player.GameManager:collect(self.entity.iid)
 	self.entity.fields.PickedUp = true

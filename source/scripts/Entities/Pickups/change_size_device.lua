@@ -15,7 +15,7 @@ function ChangeSizeDevice:init(x, y, entity)
 	self:add()
 end
 
-function ChangeSizeDevice:pickup(player)
+function ChangeSizeDevice:collect(player)
 	PopupTextBox("*SIZE CHANGING DEVICE*\nHold A to and up or down to change size", 3000, 20)
 	PickupSound:play()
 	player.bHasChangeSizeDevice = true

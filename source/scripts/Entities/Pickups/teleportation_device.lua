@@ -15,7 +15,7 @@ function TeleportationDevice:init(x, y, entity)
 	self:add()
 end
 
-function TeleportationDevice:pickup(player)
+function TeleportationDevice:collect(player)
 	PopupTextBox("*TELEPORTATION DEVICE*\nDouble tap left or right to warp", 3000, 20)
 	PickupSound:play()
 	player.GameManager:collect(self.entity.iid)

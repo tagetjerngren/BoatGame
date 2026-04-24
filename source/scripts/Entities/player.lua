@@ -1,7 +1,8 @@
 PLAYER_STATES = {
 	IN_AIR = 1,
 	STANDING = 2,
-	WALKING = 3
+	WALKING = 3,
+	CROUCHING = 4
 }
 
 import "CoreLibs/sprites"
@@ -23,6 +24,8 @@ function Player:init(x, y, gameManager)
 	-- NOTE: Smaller collision size to cover the boat more snugly
 	-- self:setCollideRect(4, 10, 26, 22)
 	self:setCollideRect(8, 4, 32 - 8 * 2, 32 - 4)
+
+	self.desiredVelocity = 0
 
 	self.maxAcceleration = 1
 	self.maxDeceleration = 0.5
@@ -69,6 +72,7 @@ function Player:init(x, y, gameManager)
 
 	self.playerImage = gfx.image.new("images/Player")
 	self.playerJumpImage = gfx.image.new("images/PlayerJump")
+	self.playerCrouchImage = gfx.image.new("images/PlayerCrouch")
 	self.playerWalkingImage = gfx.image.new(32, 32)
 	self.currentImage = self.playerImage
 	self:setImage(self.currentImage)
@@ -193,8 +197,8 @@ function Player:collisionResponse(other)
 		end
 		return "slide"
 	elseif EntityIsCollisionGroup(other, COLLISION_GROUPS.PICKUPS) then
-		if other.pickup then
-			other:pickup(self)
+		if other.collect then
+			other:collect(self)
 		end
 		return "overlap"
 	elseif EntityIsCollisionGroup(other, COLLISION_GROUPS.ENEMY) then
@@ -213,9 +217,9 @@ function Player:collisionResponse(other)
 	assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
-function Player:calculateGrounded()
+function Player:calculateGrounded(collisions)
 	self.bGrounded = false
-	local collisions, _ = self.PhysicsComponent:move(self)
+	-- local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > self.GameManager.water.height
 	for i = 1, #collisions do
 		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
@@ -259,10 +263,12 @@ function Player:calculateState()
 	if not self.bGrounded then
 		self.state = PLAYER_STATES.IN_AIR
 	else
-		if abs(self.PhysicsComponent.velocity.x) < 0.1 then
-			self.state = PLAYER_STATES.STANDING
-		else
+		if self.desiredVelocity ~= 0 then
 			self.state = PLAYER_STATES.WALKING
+		elseif self.bCrouching then
+			self.state = PLAYER_STATES.CROUCHING
+		else
+			self.state = PLAYER_STATES.STANDING
 		end
 	end
 end
@@ -270,6 +276,11 @@ end
 function Player:setPlayerImage()
 	if self.state == PLAYER_STATES.IN_AIR then
 		self:setImage(self.playerJumpImage)
+		if self.direction == -1 then
+			self:setImageFlip(gfx.kImageFlippedX)
+		end
+	elseif self.state == PLAYER_STATES.CROUCHING then
+		self:setImage(self.playerCrouchImage)
 		if self.direction == -1 then
 			self:setImageFlip(gfx.kImageFlippedX)
 		end
@@ -295,28 +306,29 @@ function Player:handleWalk()
 	local deceleration = self.bGrounded and self.maxDeceleration or self.maxAirDeceleration
 	local turnSpeed = self.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
 
-	local desiredVelocity = 0
+	self.desiredVelocity = 0
 
 	if pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
 		self.animationLoop.frame = 2
 	end
 
+	self.bCrouching = false
 	if pd.buttonIsPressed(pd.kButtonLeft) then
 		self:setImageFlip(gfx.kImageFlippedX)
 		self.direction = -1
-			desiredVelocity = -self.MaxSpeed
-	end
-
-	if pd.buttonIsPressed(pd.kButtonRight) then
+			self.desiredVelocity = -self.MaxSpeed
+	elseif pd.buttonIsPressed(pd.kButtonRight) then
 		self.direction = 1
 		self:setImageFlip(gfx.kImageUnflipped)
-			desiredVelocity = self.MaxSpeed
+			self.desiredVelocity = self.MaxSpeed
+	elseif pd.buttonIsPressed(pd.kButtonDown) then
+		self.bCrouching = true
 	end
 
 	local maxSpeedChange
 
 	if desiredVelocity ~= 0 then
-		if desiredVelocity/abs(desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
+		if self.desiredVelocity/abs(self.desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
 			maxSpeedChange = turnSpeed
 		else
 			maxSpeedChange = acceleration
@@ -325,10 +337,10 @@ function Player:handleWalk()
 		maxSpeedChange = deceleration
 	end
 
-	if abs(desiredVelocity - self.PhysicsComponent.velocity.x) ~= 0 then
+	if abs(self.desiredVelocity - self.PhysicsComponent.velocity.x) ~= 0 then
 		-- NOTE: THIS PREVENTS OVERSHOOT
-		 maxSpeedChange = abs(desiredVelocity - self.PhysicsComponent.velocity.x) < maxSpeedChange and abs(desiredVelocity - self.PhysicsComponent.velocity.x) or maxSpeedChange
-		self.PhysicsComponent.velocity.x += ((desiredVelocity - self.PhysicsComponent.velocity.x) / abs(desiredVelocity - self.PhysicsComponent.velocity.x)) * maxSpeedChange
+		 maxSpeedChange = abs(self.desiredVelocity - self.PhysicsComponent.velocity.x) < maxSpeedChange and abs(self.desiredVelocity - self.PhysicsComponent.velocity.x) or maxSpeedChange
+		self.PhysicsComponent.velocity.x += ((self.desiredVelocity - self.PhysicsComponent.velocity.x) / abs(self.desiredVelocity - self.PhysicsComponent.velocity.x)) * maxSpeedChange
 	end
 end
 
@@ -353,7 +365,8 @@ end
 function Player:update()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity * self.gravityScale)
-	print("Gravity: "..Gravity * self.gravityScale)
+	-- print("Gravity: "..Gravity * self.gravityScale)
+	local collisions
 
 	if self.bActive then
 		if pd.buttonJustPressed(pd.kButtonUp) then
@@ -365,8 +378,7 @@ function Player:update()
 			end
 		end
 
-		-- if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
-		if pd.buttonJustPressed(pd.kButtonA) then
+		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
 			-- self.bDesireJump = true
 			self.PhysicsComponent.velocity.y = -8
 		end
@@ -386,20 +398,35 @@ function Player:update()
 		-- end
 
 		self:handleWalk()
+
+		collisions, _ = self.PhysicsComponent:move(self)
+
+		-- NOTE: Pickup physics objects
+		if self.bHoldingObject then
+			self.bHeldImage:draw(self.x - 8, self.y - 32 - 16)
+			if pd.buttonJustPressed(pd.kButtonB) then
+				self.bHeldObject:throw(self)
+			end
+		elseif pd.buttonJustPressed(pd.kButtonB) then
+			local CollidingWithSprites = self:overlappingSprites()
+			for _, sprite in ipairs(CollidingWithSprites) do
+				if sprite.pickup then
+					sprite:pickup(self)
+				end
+			end
+		end
 	end
 
 	-- print("Actual Velocity"..self.PhysicsComponent.velocity.x)
 
-	self:calculateGrounded()
+	self:calculateGrounded(collisions)
 
 	self:keepPlayerWithinMap()
 
-	-- NOTE: Figuring out player state
 	self:calculateState()
 
 	-- print(self.state)
 
-	-- NOTE: SETTING THE PLAYER IMAGE
 	self:setPlayerImage()
 
 	self:DrawHealthBar()

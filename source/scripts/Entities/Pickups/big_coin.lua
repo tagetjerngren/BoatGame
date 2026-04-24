@@ -20,7 +20,7 @@ function BigCoin:update()
 	self:moveTo(self.x, self.y + 0.2 * math.cos(2 * pd.getElapsedTime()))
 end
 
-function BigCoin:pickup(player)
+function BigCoin:collect(player)
 	player.coins += 100
 	self.entity.fields.Collected = true
 	player.GameManager:collect(self.entity.iid)

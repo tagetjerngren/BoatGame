@@ -15,7 +15,7 @@ function HeartExpansion:init(x, y, entity)
 	self:add()
 end
 
-function HeartExpansion:pickup(player)
+function HeartExpansion:collect(player)
 	PopupTextBox("*Health Expansion*", 3000, 20)
 	PickupSound:play()
 	player.MaxHealth += 2

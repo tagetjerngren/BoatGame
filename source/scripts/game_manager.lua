@@ -16,6 +16,8 @@ import "scripts/Entities/Pickups/coin"
 import "scripts/Entities/Pickups/big_coin"
 import "scripts/Entities/Pickups/player_corpse"
 
+import "scripts/Entities/offering"
+
 -- NOTE: Hazards
 import "scripts/Entities/Hazards/bouncing_spike"
 import "scripts/Entities/Hazards/diagonal_enemy"
@@ -389,6 +391,10 @@ function GameManager:goToLevel(level_name)
 			local MineInstance = Mine(entityX, entityY)
 			table.insert(self.ActivePhysicsComponents, MineInstance.PhysicsComponent)
 			self.entityInstance[entity.iid] = MineInstance
+		elseif entityName == "Offering" then
+			local OfferingInstance = Offering(entityX, entityY)
+			table.insert(self.ActivePhysicsComponents, OfferingInstance.PhysicsComponent)
+			self.entityInstance[entity.iid] = OfferingInstance
 		elseif entityName == "MooredMine" then
 			local MineInstance = MooredMine(entityX, entityY, entity)
 			table.insert(self.ActivePhysicsComponents, MineInstance.PhysicsComponent)

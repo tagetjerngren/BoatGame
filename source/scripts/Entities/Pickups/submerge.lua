@@ -15,7 +15,7 @@ function Submerge:init(x, y, entity)
 	self:add()
 end
 
-function Submerge:pickup(player)
+function Submerge:collect(player)
 	PopupTextBox("*SUBMERGE*\nCan now dive underwater with the d-pad", 3000, 20)
 	PickupSound:play()
 	player.bHasSubmerge = true

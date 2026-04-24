@@ -15,7 +15,7 @@ function WheelPickup:init(x, y, entity)
 	self:add()
 end
 
-function WheelPickup:pickup(player)
+function WheelPickup:collect(player)
 	PopupTextBox("*WHEELS*\nLet's you drive around out of the water", 3000, 20)
 	PickupSound:play()
 	player.bHasWheels = true

@@ -15,7 +15,7 @@ function CompanionPickup:init(x, y, entity)
 	self:add()
 end
 
-function CompanionPickup:pickup(player)
+function CompanionPickup:collect(player)
 	PopupTextBox("*COMPANION*\nHelps you feel less lonely in these trying times", 3000, 20)
 	PickupSound:play()
 	player.companion = Companion(player.x, player.y, player)

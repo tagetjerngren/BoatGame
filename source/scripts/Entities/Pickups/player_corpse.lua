@@ -23,7 +23,7 @@ function PlayerCorpse:update()
 	self:moveTo(self.x, self.y + 0.1 * math.cos(5 * pd.getElapsedTime()))
 end
 
-function PlayerCorpse:pickup(player)
+function PlayerCorpse:collect(player)
 	self.corpseCollectedSound:play()
 	player.coins += self.coins
 	self.GameManager.playerCorpse = nil

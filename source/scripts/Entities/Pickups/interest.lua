@@ -15,7 +15,7 @@ function Interest:init(x, y, entity)
 	self:add()
 end
 
-function Interest:pickup(player)
+function Interest:collect(player)
 	PopupTextBox("*INTEREST*\nAccrue both health and wealth over time", 3000, 20)
 	PickupSound:play()
 	player.bHasInterest = true

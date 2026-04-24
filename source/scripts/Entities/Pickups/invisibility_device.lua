@@ -15,7 +15,7 @@ function InvisibilityDevice:init(x, y, entity)
 	self:add()
 end
 
-function InvisibilityDevice:pickup(player)
+function InvisibilityDevice:collect(player)
 	PopupTextBox("*INVISIBILITY DEVICE*\nHold B to turn invisible", 3000, 20)
 	PickupSound:play()
 	player.bHasInvisibilityDevice = true
