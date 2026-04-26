@@ -21,7 +21,7 @@ function BigCoin:update()
 end
 
 function BigCoin:collect(player)
-	player.PlayerData.coins += 100
+	self.PlayerData:addCoins(100)
 	self.entity.fields.Collected = true
 	player.GameManager:collect(self.entity.iid)
 	self.coinPickupSound:play()

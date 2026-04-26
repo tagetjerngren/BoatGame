@@ -5,17 +5,17 @@ class('PlayerData').extends()
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local HealthImage = gfx.image.new(250, 100)
-local OldCoin = nil
-local CoinImage = gfx.image.new(100, 100)
+local CoinBackgroundImage = gfx.image.new(100, 100)
+local HudHealthImage = gfx.image.new(250, 100)
+local HudCoinImage = gfx.image.new(100, 100)
 
 local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
 local FullHeartImage = gfx.image.new("images/HeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
 
 function PlayerData:DrawHearts(Health, MaxHealth)
-	HealthImage:clear(gfx.kColorClear)
-	gfx.lockFocus(HealthImage)
+	HudHealthImage:clear(gfx.kColorClear)
+	gfx.lockFocus(HudHealthImage)
 
 	local FullHearts = math.floor(Health / 2)
 	local HaveHalfHeart = (Health % 2) == 1
@@ -35,24 +35,27 @@ function PlayerData:DrawHearts(Health, MaxHealth)
 
 	gfx.unlockFocus()
 
-	UISystem:drawImageAt(HealthImage, 0, 0)
+	UISystem:drawImageAt(HudHealthImage, 0, 0)
 end
 
 function PlayerData:DrawCoins()
-	if (OldCoin ~= self.coins) then
-		CoinImage:clear(gfx.kColorClear)
-		gfx.lockFocus(CoinImage)
-		local nsCoins = gfx.nineSlice.new("images/OneWayDoor", 5, 5, 22, 22)
-		local width, _ = gfx.getTextSize(math.floor(self.coins).."x")
-		nsCoins:drawInRect(10, 50, width + 45, 28)
-		gfx.drawText(math.floor(self.coins).." x", 20, 55)
-		gfx.image.new("images/Coin"):draw(30 + width, 56)
-		gfx.unlockFocus()
+	HudCoinImage:clear(gfx.kColorClear)
+	gfx.lockFocus(HudCoinImage)
+
+	CoinBackgroundImage:draw(0, 0)
+	local coins = math.floor(self.coins)
+	local coinsString = tostring(coins)
+	local zeroesToPrepend = 4 - string.len(coinsString)
+	for i = 1, zeroesToPrepend do
+		coinsString = "0"..coinsString
 	end
 
-	OldCoin = self.coins
+	local width, _ = gfx.getTextSize("9999")
+	gfx.drawText(coinsString, 20, 55)
+	gfx.image.new("images/Coin"):draw(30 + width, 56)
+	gfx.unlockFocus()
 
-	UISystem:drawImageAt(CoinImage, 300, -40)
+	UISystem:drawImageAt(HudCoinImage, 300, -40)
 end
 
 function PlayerData:DrawPlayerHud()
@@ -73,7 +76,17 @@ function PlayerData:DamageBoat(amount)
 	self.BoatHealth = math.max(0, self.BoatHealth - amount)
 end
 
+function PlayerData:addCoins(amount)
+	self.coins = math.min(self.MaxCoins, self.coins + amount)
+end
+
 function PlayerData:init()
+	gfx.lockFocus(CoinBackgroundImage)
+	local nsCoins = gfx.nineSlice.new("images/OneWayDoor", 5, 5, 22, 22)
+	local width, _ = gfx.getTextSize("9999")
+	nsCoins:drawInRect(10, 50, width + 42, 28)
+	gfx.unlockFocus()
+
 	self.bHoldingObject = false
 	self.HeldImage = nil
 	self.HeldObject = nil
@@ -84,5 +97,6 @@ function PlayerData:init()
 	self.BoatMaxHealth = 6
 	self.BoatHealth = self.BoatMaxHealth
 
+	self.MaxCoins = 9999
 	self.coins = 0
 end
