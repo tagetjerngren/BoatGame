@@ -13,7 +13,8 @@ function PlayerBoat:init(x, y, image, speed, gameManager)
 	self.GameManager = gameManager
 
 	self:moveTo(x,y)
-	self:setImage(image)
+
+	self.PlayerData = gameManager.PlayerData
 
 	-- NOTE: Smaller collision size to cover the boat more snugly
 	self:setCollideRect(4, 10, 26, 22)
@@ -48,9 +49,11 @@ function PlayerBoat:init(x, y, image, speed, gameManager)
 
 	self.lightRadius = 50
 
-	self.boatImage = gfx.image.new("images/Boat")
+	self.boatImage = gfx.image.new("images/PlayerBoat")
+	self.boatHoldingImage = gfx.image.new("images/PlayerBoat-Holding")
 	self.wheelBoatImage = gfx.image.new("images/WheelBoat")
 	self.currentImage = self.boatImage
+	self:setImage(self.boatImage)
 
 	self.sampleCollection = {}
 	for i = 1, 21 do
@@ -178,8 +181,8 @@ function PlayerBoat:collisionResponse(other)
 		end
 		return "slide"
 	elseif EntityIsCollisionGroup(other, COLLISION_GROUPS.PICKUPS) then
-		if other.pickup then
-			other:pickup(self)
+		if other.collect then
+			other:collect(self)
 		end
 		return "overlap"
 	elseif EntityIsCollisionGroup(other, COLLISION_GROUPS.ENEMY) then
@@ -205,22 +208,32 @@ function PlayerBoat:update()
 	end
 
 	-- NOTE: This whole chunk just determines which sprite the player should be, it kind of disgusts me but I can't really think of anything better. Maybe implement a state machine and let that sort out sprite changing?
-	if self.bHasWheels and self.bGrounded then
-		if self.currentImage ~= self.wheelBoatImage then
-			self:setImage(self.wheelBoatImage)
-			self.currentImage = self.wheelBoatImage
-			if self.direction == -1 then
-				self:setImageFlip(gfx.kImageFlippedX)
-			end
-		end
+
+	-- if self.bHasWheels and self.bGrounded then
+	-- 	if self.currentImage ~= self.wheelBoatImage then
+	-- 		self:setImage(self.wheelBoatImage)
+	-- 		self.currentImage = self.wheelBoatImage
+	-- 		if self.direction == -1 then
+	-- 			self:setImageFlip(gfx.kImageFlippedX)
+	-- 		end
+	-- 	end
+	-- else
+	-- 	if self.currentImage ~= self.boatImage then
+	-- 		self:setImage(self.boatImage)
+	-- 		self.currentImage = self.boatImage
+	-- 		if self.direction == -1 then
+	-- 			self:setImageFlip(gfx.kImageFlippedX)
+	-- 		end
+	-- 	end
+	-- end
+
+	if self.PlayerData.bHoldingObject then
+		self:setImage(self.boatHoldingImage)
 	else
-		if self.currentImage ~= self.boatImage then
-			self:setImage(self.boatImage)
-			self.currentImage = self.boatImage
-			if self.direction == -1 then
-				self:setImageFlip(gfx.kImageFlippedX)
-			end
-		end
+		self:setImage(self.boatImage)
+	end
+	if self.direction == -1 then
+		self:setImageFlip(gfx.kImageFlippedX)
 	end
 
 
@@ -329,12 +342,19 @@ function PlayerBoat:update()
 		if self.bHasSubmerge then
 			DoSubmerge(self)
 		end
+
 	end
+
 
 	self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
 
 	self.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
+
+	if self.PlayerData.bHoldingObject then
+		self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 8)
+	end
+
 	self.bUnderwater = self.y > self.GameManager.water.height
 	for i = 1, #collisions do
 		if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then

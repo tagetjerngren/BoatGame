@@ -52,6 +52,7 @@ import "scripts/Entities/NPCs/the_upgrader"
 
 -- NOTE: Misc
 import "scripts/Entities/player"
+import "scripts/player_data"
 import "scripts/Entities/player_boat"
 import "scripts/Entities/unoccupied_boat"
 import "scripts/Entities/Misc/save_point"
@@ -139,8 +140,9 @@ function GameManager:init(bLoadGame)
 		self.miniMapWithHighlight = self.miniMap:copy()
 	end
 
-
 	self.ActivePhysicsComponents = {}
+
+	self.PlayerData = PlayerData()
 
 	self.ui = UISystem
 	self.songManager = pd.sound.fileplayer.new()
@@ -328,6 +330,10 @@ function GameManager:goToLevel(level_name)
 	self.water:add()
 	self.ui:add()
 
+	if self.PlayerData.bHoldingObject then
+		self.PlayerData.HeldObject:add()
+	end
+
 	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
 		self.unoccupiedBoat:add()
 		self.unoccupiedBoat.notif:add()
@@ -353,6 +359,10 @@ function GameManager:goToLevel(level_name)
 
 	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
 		table.insert(self.ActivePhysicsComponents, self.unoccupiedBoat.PhysicsComponent)
+	end
+
+	if self.PlayerData.bHoldingObject then
+		table.insert(self.ActivePhysicsComponents, self.PlayerData.HeldObject.PhysicsComponent)
 	end
 
 	-- NOTE: This adds in all of the tiles and their collisions

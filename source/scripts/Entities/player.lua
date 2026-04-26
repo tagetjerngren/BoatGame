@@ -25,6 +25,8 @@ function Player:init(x, y, gameManager)
 	-- self:setCollideRect(4, 10, 26, 22)
 	self:setCollideRect(8, 4, 32 - 8 * 2, 32 - 4)
 
+	self.PlayerData = gameManager.PlayerData
+
 	self.desiredVelocity = 0
 
 	self.maxAcceleration = 1
@@ -70,9 +72,17 @@ function Player:init(x, y, gameManager)
 	local animationImageTable = gfx.imagetable.new("images/PlayerWalk")
 	self.animationLoop = gfx.animation.loop.new(frameTime, animationImageTable, true)
 
+	local holdingAnimationImageTable = gfx.imagetable.new("images/PlayerWalk-Holding")
+	self.animationLoopHolding = gfx.animation.loop.new(frameTime, holdingAnimationImageTable, true)
+
 	self.playerImage = gfx.image.new("images/Player")
 	self.playerJumpImage = gfx.image.new("images/PlayerJump")
 	self.playerCrouchImage = gfx.image.new("images/PlayerCrouch")
+
+	self.playerHoldingImage = gfx.image.new("images/Player-Holding")
+	self.playerJumpHoldingImage = gfx.image.new("images/PlayerJump-Holding")
+	self.playerCrouchHoldingImage = gfx.image.new("images/PlayerCrouch-Holding")
+
 	self.playerWalkingImage = gfx.image.new(32, 32)
 	self.currentImage = self.playerImage
 	self:setImage(self.currentImage)
@@ -275,29 +285,41 @@ end
 
 function Player:setPlayerImage()
 	if self.state == PLAYER_STATES.IN_AIR then
-		self:setImage(self.playerJumpImage)
-		if self.direction == -1 then
-			self:setImageFlip(gfx.kImageFlippedX)
+		if self.PlayerData.bHoldingObject then
+			self:setImage(self.playerJumpHoldingImage)
+		else
+			self:setImage(self.playerJumpImage)
 		end
 	elseif self.state == PLAYER_STATES.CROUCHING then
-		self:setImage(self.playerCrouchImage)
-		if self.direction == -1 then
-			self:setImageFlip(gfx.kImageFlippedX)
+		if self.PlayerData.bHoldingObject then
+			self:setImage(self.playerCrouchHoldingImage)
+		else
+			self:setImage(self.playerCrouchImage)
 		end
 	elseif self.state == PLAYER_STATES.STANDING then
-		self:setImage(self.playerImage)
-		if self.direction == -1 then
-			self:setImageFlip(gfx.kImageFlippedX)
+		if self.PlayerData.bHoldingObject then
+			self:setImage(self.playerHoldingImage)
+		else
+			self:setImage(self.playerImage)
 		end
 	elseif self.state == PLAYER_STATES.WALKING then
-		self.playerWalkingImage:clear(gfx.kColorClear)
-		self:setImage(self.playerWalkingImage)
-		gfx.lockFocus(self:getImage())
-		self.animationLoop:draw(0, 0)
-		gfx.unlockFocus()
-		if self.direction == -1 then
-			self:setImageFlip(gfx.kImageFlippedX)
+		if self.PlayerData.bHoldingObject then
+			self.playerWalkingImage:clear(gfx.kColorClear)
+			self:setImage(self.playerWalkingImage)
+			gfx.lockFocus(self:getImage())
+			self.animationLoopHolding:draw(0, 0)
+			gfx.unlockFocus()
+		else
+			self.playerWalkingImage:clear(gfx.kColorClear)
+			self:setImage(self.playerWalkingImage)
+			gfx.lockFocus(self:getImage())
+			self.animationLoop:draw(0, 0)
+			gfx.unlockFocus()
 		end
+	end
+
+	if self.direction == -1 then
+		self:setImageFlip(gfx.kImageFlippedX)
 	end
 end
 
@@ -310,6 +332,7 @@ function Player:handleWalk()
 
 	if pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
 		self.animationLoop.frame = 2
+		self.animationLoopHolding.frame = 2
 	end
 
 	self.bCrouching = false
@@ -402,10 +425,19 @@ function Player:update()
 		collisions, _ = self.PhysicsComponent:move(self)
 
 		-- NOTE: Pickup physics objects
-		if self.bHoldingObject then
-			self.bHeldImage:draw(self.x - 8, self.y - 32 - 16)
+		if self.PlayerData.bHoldingObject then
+			if self.bCrouching then
+				self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 10)
+			else
+				if self.state == PLAYER_STATES.WALKING and self.animationLoop.frame % 2 == 0 then
+					self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 14 - 1)
+				else
+					self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 14)
+				end
+			end
+
 			if pd.buttonJustPressed(pd.kButtonB) then
-				self.bHeldObject:throw(self)
+				self.PlayerData.HeldObject:throw(self)
 			end
 		elseif pd.buttonJustPressed(pd.kButtonB) then
 			local CollidingWithSprites = self:overlappingSprites()
