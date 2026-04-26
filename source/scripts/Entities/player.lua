@@ -55,10 +55,7 @@ function Player:init(x, y, gameManager)
 	self:setGroups(COLLISION_GROUPS.PLAYER)
 	self:setCollidesWithGroups({COLLISION_GROUPS.WALL, COLLISION_GROUPS.ENEMY, COLLISION_GROUPS.EXPLOSIVE, COLLISION_GROUPS.TRIGGER, COLLISION_GROUPS.PICKUPS})
 
-	self.MaxHealth = 6
-	self.Health = self.MaxHealth
 	self.Invincible = 0
-	self.coins = 0
 	self.explosionMeter = 0
 
 	self.bActive = true
@@ -99,10 +96,9 @@ function Player:damage(amount, iFrames)
 	pd.timer.performAfterDelay(75, function ()
 		self:getImage():setInverted(false)
 	end)
-	self.Health -= amount
+	self.PlayerData:DamagePlayer(amount)
 	self.Invincible = iFrames
-	if self.Health <= 0 then
-		self.Health = 0
+	if self.PlayerData.PlayerHealth == 0 then
 		Explosion(self.x, self.y)
 		self:setVisible(false)
 		self.bActive = false
@@ -120,10 +116,10 @@ end
 
 function Player:Respawn()
 	self:add()
-	self.Health = self.MaxHealth
+	self.PlayerData.PlayerHealth = self.PlayerData.PlayerMaxHealth
 
-	self.GameManager.playerCorpse = PlayerCorpse(self.x, self.y, self.GameManager.currentLevel, self.GameManager, self.coins, self.direction)
-	self.coins = 0
+	self.GameManager.playerCorpse = PlayerCorpse(self.x, self.y, self.GameManager.currentLevel, self.GameManager, self.PlayerData.coins, self.direction)
+	self.PlayerData.coins = 0
 
 	if self.savePoint then
 		self.GameManager:goToLevel(self.savePoint.level)
@@ -146,55 +142,6 @@ function Player:Respawn()
 
 end
 
-local OldHealth = nil
-local HealthImage = gfx.image.new(250, 100)
-local OldCoin = nil
-local CoinImage = gfx.image.new(100, 100)
-
-local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
-local FullHeartImage = gfx.image.new("images/HeartIcon")
-local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
-
-function Player:DrawHealthBar()
-	HealthImage:clear(gfx.kColorClear)
-	gfx.lockFocus(HealthImage)
-
-	local FullHearts = math.floor(self.Health / 2)
-	local HaveHalfHeart = (self.Health % 2) == 1
-	local EmptyHearts = math.floor((self.MaxHealth - self.Health) / 2)
-
-	for i = 1, FullHearts do
-		FullHeartImage:draw(16 + (i - 1) * 32, 16)
-	end
-
-	if HaveHalfHeart then
-		HalfHeartImage:draw(16 + (FullHearts) * 32, 16)
-	end
-
-	for i = math.ceil(self.Health / 2) + 1, self.MaxHealth / 2 do
-		EmptyHeartImage:draw(16 + (i - 1) * 32, 16)
-	end
-
-	gfx.unlockFocus()
-
-	UISystem:drawImageAt(HealthImage, 0, 0)
-
-	if (OldCoin ~= self.coins) then
-		CoinImage:clear(gfx.kColorClear)
-		gfx.lockFocus(CoinImage)
-		local nsCoins = gfx.nineSlice.new("images/OneWayDoor", 5, 5, 22, 22)
-		local width, _ = gfx.getTextSize(math.floor(self.coins).."x")
-		nsCoins:drawInRect(10, 50, width + 45, 28)
-		gfx.drawText(math.floor(self.coins).." x", 20, 55)
-		gfx.image.new("images/Coin"):draw(30 + width, 56)
-		gfx.unlockFocus()
-	end
-
-	OldCoin = self.coins
-	OldHealth = self.Health
-
-	UISystem:drawImageAt(CoinImage, 300, -40)
-end
 
 function Player:addForce(Force)
 	self.PhysicsComponent:addForce(Force)
@@ -230,7 +177,7 @@ end
 function Player:calculateGrounded(collisions)
 	self.bGrounded = false
 	-- local collisions, _ = self.PhysicsComponent:move(self)
-	self.bUnderwater = self.y > self.GameManager.water.height
+	self.bUnderwater = self.y - 32 > self.GameManager.water.height
 	for i = 1, #collisions do
 		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
 			self.bGrounded = true
@@ -369,7 +316,6 @@ end
 
 function Player:jump(gravity)
 	self.bDesireJump = false
-	print("JUMP!")
 
 	if self.bGrounded then
 		local jumpSpeed = math.sqrt(2 * gravity * self.gravityScale * self.jumpHeight)
@@ -449,19 +395,15 @@ function Player:update()
 		end
 	end
 
-	-- print("Actual Velocity"..self.PhysicsComponent.velocity.x)
-
 	self:calculateGrounded(collisions)
 
 	self:keepPlayerWithinMap()
 
 	self:calculateState()
 
-	-- print(self.state)
-
 	self:setPlayerImage()
 
-	self:DrawHealthBar()
+	self.PlayerData:DrawPlayerHud()
 
 	if self.Invincible > 0 then
 		self.Invincible -= 1
