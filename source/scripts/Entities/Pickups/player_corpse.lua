@@ -25,7 +25,7 @@ end
 
 function PlayerCorpse:collect(player)
 	self.corpseCollectedSound:play()
-	player.coins += self.coins
+	player.PlayerData.coins += self.coins
 	self.GameManager.playerCorpse = nil
 	self:remove()
 end
