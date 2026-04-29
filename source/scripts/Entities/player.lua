@@ -337,11 +337,16 @@ function Player:saveGroundedPosition()
 		self:moveTo(self.LastGroundedX, self.LastGroundedY - 5)
 		self.PhysicsComponent:setPosition(self.x, self.y)
 		self.PhysicsComponent:setVelocity(0, 0)
+		self:damage(1, 0)
 	elseif self.bGrounded then
-		local closestCollision, collisionPoint = Raycast(self.x, self.y, 0, 17, {self}, {})
-		if closestCollision then
-			self.LastGroundedX = self.x
-			self.LastGroundedY = self.y
+		local checkWidth = 5
+		local leftCollisionSprite, leftCollisionPoint = Raycast(self.x - checkWidth, self.y, 0, 17, {self}, {})
+		local rightCollisionSprite, rightCollisionPoint = Raycast(self.x + checkWidth, self.y, 0, 17, {self}, {})
+		if leftCollisionPoint and rightCollisionPoint then
+			if self:collisionResponse(leftCollisionSprite) == "slide" and self:collisionResponse(rightCollisionSprite) == "slide" then
+				self.LastGroundedX = self.x
+				self.LastGroundedY = self.y
+			end
 		end
 	end
 end
