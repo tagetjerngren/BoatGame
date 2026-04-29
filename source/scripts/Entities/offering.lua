@@ -43,11 +43,20 @@ end
 function Offering:throw(player)
 	player.PlayerData.bHoldingObject = false
 	self:setVisible(true)
-	self.PhysicsComponent.position.x = player.x - 8
-	self.PhysicsComponent.position.y = player.y - 32 - 16
+	self.PhysicsComponent.position.x = player.x
+	self.PhysicsComponent.position.y = player.y - 32
 	self.PhysicsComponent.velocity = player.PhysicsComponent.velocity
 	self:moveTo(self.PhysicsComponent.position.x, self.PhysicsComponent.position.y)
-	self.PhysicsComponent:addForce(player.direction * 3, -3)
+	self.PhysicsComponent:addForce(player.direction * 4, -4)
+end
+
+function Offering:drop(player)
+	player.PlayerData.bHoldingObject = false
+	self:setVisible(true)
+	self.PhysicsComponent.position.x = player.x
+	self.PhysicsComponent.position.y = player.y - 32
+	self.PhysicsComponent.velocity = player.PhysicsComponent.velocity
+	self:moveTo(self.PhysicsComponent.position.x, self.PhysicsComponent.position.y)
 end
 
 function Offering:keepWithinMap()

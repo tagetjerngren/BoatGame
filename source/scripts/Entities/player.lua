@@ -403,7 +403,11 @@ function Player:update()
 			end
 
 			if pd.buttonJustPressed(pd.kButtonB) then
-				self.PlayerData.HeldObject:throw(self)
+				if pd.buttonIsPressed(pd.kButtonDown) then
+					self.PlayerData.HeldObject:drop(self)
+				else
+					self.PlayerData.HeldObject:throw(self)
+				end
 			end
 		elseif pd.buttonJustPressed(pd.kButtonB) then
 			local CollidingWithSprites = self:overlappingSprites()
