@@ -34,7 +34,7 @@ function Player:init(x, y, gameManager)
 	self.maxTurnSpeed = 1.3
 
 	self.maxAirAcceleration = 0.3
-	self.maxAirDeceleration = 0.05
+	self.maxAirDeceleration = 0.02
 	self.maxAirTurnSpeed = 0.4
 
 	self.MaxSpeed = 4
@@ -370,6 +370,14 @@ function Player:update()
 		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
 			-- self.bDesireJump = true
 			self.PhysicsComponent.velocity.y = -8
+			self.bJumped = true
+		end
+
+		-- NOTE: This is so the player falls faster in their descent, doesn't apply when they walk off the edge
+		if self.bJumped and self.PhysicsComponent.velocity.y > 0 then
+			self.gravityScale = 1.5
+		else
+			self.gravityScale = 1
 		end
 
 		-- local newGravity = (2 * self.jumpHeight) / (self.timeToJumpApex * self.timeToJumpApex)
@@ -420,6 +428,11 @@ function Player:update()
 	end
 
 	self:calculateGrounded(collisions)
+
+	-- NOTE: Resets the jumped state when the player is on the ground
+	if self.bGrounded then
+		self.bJumped = false
+	end
 
 	self:keepPlayerWithinMap()
 
