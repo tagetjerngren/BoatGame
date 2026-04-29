@@ -30,12 +30,12 @@ function Player:init(x, y, gameManager)
 	self.desiredVelocity = 0
 
 	self.maxAcceleration = 1
-	self.maxDeceleration = 0.5
+	self.maxDeceleration = 0.8
 	self.maxTurnSpeed = 1.3
 
-	self.maxAirAcceleration = 0.5
-	self.maxAirDeceleration = 0.1
-	self.maxAirTurnSpeed = 0.6
+	self.maxAirAcceleration = 0.3
+	self.maxAirDeceleration = 0.05
+	self.maxAirTurnSpeed = 0.4
 
 	self.MaxSpeed = 4
 
@@ -297,7 +297,7 @@ function Player:handleWalk()
 
 	local maxSpeedChange
 
-	if desiredVelocity ~= 0 then
+	if self.desiredVelocity ~= 0 then
 		if self.desiredVelocity/abs(self.desiredVelocity) ~= self.PhysicsComponent.velocity.x/abs(self.PhysicsComponent.velocity.x) then
 			maxSpeedChange = turnSpeed
 		else
