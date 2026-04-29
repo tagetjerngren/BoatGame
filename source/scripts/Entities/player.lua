@@ -331,6 +331,21 @@ function Player:jump(gravity)
 	end
 end
 
+-- NOTE: This name sucks and doesn't cover everything it does, reconsider
+function Player:saveGroundedPosition()
+	if self.bUnderwater then
+		self:moveTo(self.LastGroundedX, self.LastGroundedY - 5)
+		self.PhysicsComponent:setPosition(self.x, self.y)
+		self.PhysicsComponent:setVelocity(0, 0)
+	elseif self.bGrounded then
+		local closestCollision, collisionPoint = Raycast(self.x, self.y, 0, 17, {self}, {})
+		if closestCollision then
+			self.LastGroundedX = self.x
+			self.LastGroundedY = self.y
+		end
+	end
+end
+
 function Player:update()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity * self.gravityScale)
@@ -408,4 +423,5 @@ function Player:update()
 	if self.Invincible > 0 then
 		self.Invincible -= 1
 	end
+	self:saveGroundedPosition()
 end
