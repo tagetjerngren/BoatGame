@@ -3,6 +3,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/animation"
 
 import "scripts/Misc/physics_component"
+import "scripts/Scenes/ability_menu"
 
 local pd <const> = playdate
 local gfx <const> = pd.graphics
@@ -182,76 +183,13 @@ function PlayerBoat:update()
 		self:setImageFlip(gfx.kImageFlippedX)
 	end
 
-
-	if self.bHasInterest then
-		DoInterest(self)
-	end
-
-	if self.bHasInvisibilityDevice then
-		Invisibility(self, pd.kButtonB)
-	end
-
-	if self.bHasChangeSizeDevice then
-		ChangeSize(self, pd.kButtonA)
-	end
-
 	if self.bActive then
-
 		if pd.buttonJustPressed(pd.kButtonUp) then
 			local CollidingWithSprites = self:overlappingSprites()
 			for _, sprite in ipairs(CollidingWithSprites) do
 				if sprite.interact then
 					sprite:interact(self)
 				end
-			end
-		end
-
-		if self.AbilityA then
-			self:AbilityA(pd.kButtonA)
-		end
-
-		-- NOTE: I've decided that only the weapon will be an optionable upgrade, otherwise there is just too much world to make, I still sort of like the idea but it would need more work than I'm willing to implement
-		-- if self.AbilityB then
-		-- 	self:AbilityB(pd.kButtonB)
-		-- end
-
-		-- if self.PassiveAbility then
-		-- 	self:PassiveAbility()
-		-- end
-
-		local TeleportDistance = 64
-		-- NOTE: Press the same button within this many frames for it to count as a double tap
-		local TeleportDoubleTapFrames = 5
-
-		if self.bCanTeleport then
-			if pd.buttonJustPressed(pd.kButtonLeft) and self.bDoubleLeft then
-				self:moveBy(-TeleportDistance, 0)
-				local Collisions = self:overlappingSprites()
-				if #Collisions > 0 then
-					self:moveBy(TeleportDistance, 0)
-				else
-					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
-				end
-			elseif pd.buttonJustPressed(pd.kButtonLeft) then
-				self.bDoubleLeft = true
-				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
-					self.bDoubleLeft = false
-				end)
-			end
-
-			if pd.buttonJustPressed(pd.kButtonRight) and self.bDoubleRight then
-				self:moveBy(TeleportDistance, 0)
-				local Collisions = self:overlappingSprites()
-				if #Collisions > 0 then
-					self:moveBy(-TeleportDistance, 0)
-				else
-					self.PhysicsComponent.position = pd.geometry.vector2D.new(self.x, self.y)
-				end
-			elseif pd.buttonJustPressed(pd.kButtonRight) then
-				self.bDoubleRight = true
-				pd.frameTimer.performAfterDelay(TeleportDoubleTapFrames, function ()
-					self.bDoubleRight = false
-				end)
 			end
 		end
 
@@ -289,6 +227,13 @@ function PlayerBoat:update()
 			DoSubmerge(self)
 		end
 
+		if self.PlayerData.activeAbility then
+			self.PlayerData.activeAbility.func(self, pd.kButtonA)
+		end
+
+		if pd.buttonJustReleased(pd.kButtonB) then
+			AbilityMenu(self.GameManager)
+		end
 	end
 
 
@@ -311,7 +256,7 @@ function PlayerBoat:update()
 		end
 	end
 
-	if pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
+	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
 		self.GameManager.player:remove()
 		self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)

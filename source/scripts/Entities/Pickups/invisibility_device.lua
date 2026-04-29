@@ -13,12 +13,17 @@ function InvisibilityDevice:init(x, y, entity)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups(COLLISION_GROUPS.PLAYER)
 	self:add()
+	self.id = 1
 end
 
 function InvisibilityDevice:collect(player)
 	PopupTextBox("*INVISIBILITY DEVICE*\nHold B to turn invisible", 3000, 20)
 	PickupSound:play()
-	player.bHasInvisibilityDevice = true
+	player.PlayerData.abilities[self.id] = {
+		icon = gfx.image.new("images/InvisibilityDevice"),
+		func = Invisibility
+	}
+	-- player.bHasInvisibilityDevice = true
 	player.GameManager:collect(self.entity.iid)
 	self:remove()
 end

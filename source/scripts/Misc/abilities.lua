@@ -141,20 +141,37 @@ end
 
 function Invisibility(player, button)
 	if pd.buttonIsPressed(button) then
-		player:setImage(gfx.image.new("images/BoatCorpse"))
-		if player.direction == -1 then
-			player:setImageFlip(gfx.kImageFlippedX)
-		end
 		player.bInvisible = true
+		player:setImage(gfx.image.new("images/BoatCorpse"))
 	else
-		player:setImage(gfx.image.new("images/Boat"))
-		if player.direction == -1 then
-			player:setImageFlip(gfx.kImageFlippedX)
-		end
 		player.bInvisible = false
+		player:setImage(gfx.image.new("images/Boat"))
+	end
+
+	if player.direction == -1 then
+		player:setImageFlip(gfx.kImageFlippedX)
 	end
 end
 
+function Teleport(player, button)
+	local TeleportDistance = 64
+	if pd.buttonJustPressed(button) then
+		player:moveBy(TeleportDistance * player.direction, 0)
+		local Collisions = player:overlappingSprites()
+		local bTeleportedIntoObject = false
+		for i = 1, #Collisions do
+			if player:collisionResponse(Collisions[i]) ~= "overlap" then
+				bTeleportedIntoObject = true
+				break
+			end
+		end
+		if bTeleportedIntoObject then
+			player:moveBy(-TeleportDistance * player.direction, 0)
+		else
+			player.PhysicsComponent.position = pd.geometry.vector2D.new(player.x, player.y)
+		end
+	end
+end
 
 Abilities = {
 	["Jump"] = Jump,

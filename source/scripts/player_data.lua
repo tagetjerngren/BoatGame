@@ -13,24 +13,34 @@ local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
 local FullHeartImage = gfx.image.new("images/HeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
 
-function PlayerData:DrawHearts(Health, MaxHealth)
+function PlayerData:DrawHearts(Health, MaxHealth, additionalXOffset)
+	local xOffset = 48 + 4
+	local yOffset = 8
 	HudHealthImage:clear(gfx.kColorClear)
 	gfx.lockFocus(HudHealthImage)
 
+	gfx.image.new("images/CollectionCell"):draw(0, 0)
+
+	if GameManagerInstance.PlayerData.activeAbility then
+		if GameManagerInstance.player:isa(PlayerBoat) then
+			GameManagerInstance.PlayerData.activeAbility.icon:draw(8, 8)
+		end
+	end
+
 	local FullHearts = math.floor(Health / 2)
 	local HaveHalfHeart = (Health % 2) == 1
-	local EmptyHearts = math.floor((MaxHealth - Health) / 2)
+	-- local EmptyHearts = math.floor((MaxHealth - Health) / 2)
 
 	for i = 1, FullHearts do
-		FullHeartImage:draw(16 + (i - 1) * 32, 16)
+		FullHeartImage:draw(xOffset + (i - 1) * 32, yOffset)
 	end
 
 	if HaveHalfHeart then
-		HalfHeartImage:draw(16 + (FullHearts) * 32, 16)
+		HalfHeartImage:draw(xOffset + (FullHearts) * 32, yOffset)
 	end
 
 	for i = math.ceil(Health / 2) + 1, MaxHealth / 2 do
-		EmptyHeartImage:draw(16 + (i - 1) * 32, 16)
+		EmptyHeartImage:draw(xOffset + (i - 1) * 32, yOffset)
 	end
 
 	gfx.unlockFocus()
@@ -99,4 +109,10 @@ function PlayerData:init()
 
 	self.MaxCoins = 9999
 	self.coins = 0
+
+	self.abilities = {}
+	self.activeAbility = nil
+	for i = 1, 8 do
+		table.insert(self.abilities, {func = nil, icon = gfx.image.new("images/QuestionMark")})
+	end
 end

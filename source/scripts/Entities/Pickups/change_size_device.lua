@@ -13,12 +13,17 @@ function ChangeSizeDevice:init(x, y, entity)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups(COLLISION_GROUPS.PLAYER)
 	self:add()
+	self.id = 3
 end
 
 function ChangeSizeDevice:collect(player)
 	PopupTextBox("*SIZE CHANGING DEVICE*\nHold A to and up or down to change size", 3000, 20)
 	PickupSound:play()
-	player.bHasChangeSizeDevice = true
+	-- player.bHasChangeSizeDevice = true
+	player.PlayerData.abilities[self.id] = {
+		icon = gfx.image.new("images/ChangeSizeDevice"),
+		func = ChangeSize
+	}
 	player.GameManager:collect(self.entity.iid)
 	self:remove()
 end
