@@ -340,9 +340,9 @@ function Player:saveGroundedPosition()
 		self:damage(1, 0)
 	elseif self.bGrounded then
 		local checkWidth = 5
-		local leftCollisionSprite, leftCollisionPoint = Raycast(self.x - checkWidth, self.y, 0, 17, {self}, {})
-		local rightCollisionSprite, rightCollisionPoint = Raycast(self.x + checkWidth, self.y, 0, 17, {self}, {})
-		if leftCollisionPoint and rightCollisionPoint then
+		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
+		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
+		if leftCollisionSprite and rightCollisionSprite then
 			if self:collisionResponse(leftCollisionSprite) == "slide" and self:collisionResponse(rightCollisionSprite) == "slide" then
 				self.LastGroundedX = self.x
 				self.LastGroundedY = self.y
