@@ -19,7 +19,7 @@ function PlayerData:DrawHearts(Health, MaxHealth, additionalXOffset)
 	HudHealthImage:clear(gfx.kColorClear)
 	gfx.lockFocus(HudHealthImage)
 
-	gfx.image.new("images/CollectionCell"):draw(0, 0)
+	gfx.image.new("images/CollectionCellSelected"):draw(0, 0)
 
 	if GameManagerInstance.PlayerData.activeAbility then
 		if GameManagerInstance.player:isa(PlayerBoat) then
