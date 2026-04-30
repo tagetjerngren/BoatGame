@@ -9,6 +9,8 @@ local CoinBackgroundImage = gfx.image.new(100, 100)
 local HudHealthImage = gfx.image.new(250, 100)
 local HudCoinImage = gfx.image.new(100, 100)
 
+local ActiveAbilityBackgroundImage = gfx.image.new("images/CollectionCellSelected")
+
 local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
 local FullHeartImage = gfx.image.new("images/HeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
@@ -19,7 +21,7 @@ function PlayerData:DrawHearts(Health, MaxHealth, additionalXOffset)
 	HudHealthImage:clear(gfx.kColorClear)
 	gfx.lockFocus(HudHealthImage)
 
-	gfx.image.new("images/CollectionCellSelected"):draw(0, 0)
+	ActiveAbilityBackgroundImage:draw(0, 0)
 
 	if GameManagerInstance.PlayerData.activeAbility then
 		if GameManagerInstance.player:isa(PlayerBoat) then
