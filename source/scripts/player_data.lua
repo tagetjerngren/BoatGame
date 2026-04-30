@@ -10,12 +10,15 @@ local HudHealthImage = gfx.image.new(250, 100)
 local HudCoinImage = gfx.image.new(100, 100)
 
 local ActiveAbilityBackgroundImage = gfx.image.new("images/CollectionCellSelected")
+local CoinImage = gfx.image.new("images/Coin")
 
 local HalfHeartImage = gfx.image.new("images/HalfHeartIcon")
 local FullHeartImage = gfx.image.new("images/HeartIcon")
+local BoatHalfHeartImage = gfx.image.new("images/BoatHalfHeartIcon")
+local BoatFullHeartImage = gfx.image.new("images/BoatHeartIcon")
 local EmptyHeartImage = gfx.image.new("images/EmptyHeartIcon")
 
-function PlayerData:DrawHearts(Health, MaxHealth, additionalXOffset)
+function PlayerData:DrawHearts(Health, MaxHealth, bIsBoat)
 	local xOffset = 48 + 4
 	local yOffset = 8
 	HudHealthImage:clear(gfx.kColorClear)
@@ -34,11 +37,19 @@ function PlayerData:DrawHearts(Health, MaxHealth, additionalXOffset)
 	-- local EmptyHearts = math.floor((MaxHealth - Health) / 2)
 
 	for i = 1, FullHearts do
-		FullHeartImage:draw(xOffset + (i - 1) * 32, yOffset)
+		if bIsBoat then
+			BoatFullHeartImage:draw(xOffset + (i - 1) * 32, yOffset)
+		else
+			FullHeartImage:draw(xOffset + (i - 1) * 32, yOffset)
+		end
 	end
 
 	if HaveHalfHeart then
-		HalfHeartImage:draw(xOffset + (FullHearts) * 32, yOffset)
+		if bIsBoat then
+			BoatHalfHeartImage:draw(xOffset + (FullHearts) * 32, yOffset)
+		else
+			HalfHeartImage:draw(xOffset + (FullHearts) * 32, yOffset)
+		end
 	end
 
 	for i = math.ceil(Health / 2) + 1, MaxHealth / 2 do
@@ -64,7 +75,7 @@ function PlayerData:DrawCoins()
 
 	local width, _ = gfx.getTextSize("9999")
 	gfx.drawText(coinsString, 20, 55)
-	gfx.image.new("images/Coin"):draw(30 + width, 56)
+	CoinImage:draw(30 + width, 56)
 	gfx.unlockFocus()
 
 	UISystem:drawImageAt(HudCoinImage, 300, -40)
@@ -76,7 +87,7 @@ function PlayerData:DrawPlayerHud()
 end
 
 function PlayerData:DrawBoatHud()
-	self:DrawHearts(self.BoatHealth, self.BoatMaxHealth)
+	self:DrawHearts(self.BoatHealth, self.BoatMaxHealth, true)
 	self:DrawCoins()
 end
 
