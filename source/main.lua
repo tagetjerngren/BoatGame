@@ -128,7 +128,7 @@ function MainGameLoop()
 	-- NOTE: Update camera, moved out of the player
 	GameManagerInstance.camera:lerp(GameManagerInstance.player.x, GameManagerInstance.player.y, 0.2)
 
-	-- pd.drawFPS(0, 0)
+	pd.drawFPS(0, 0)
 end
 
 -- NOTE: In the simulator load the ldtk instantly so that the lua files exist without having to do anything
