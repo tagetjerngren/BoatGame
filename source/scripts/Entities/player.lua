@@ -367,10 +367,23 @@ function Player:update()
 			end
 		end
 
-		if pd.buttonJustPressed(pd.kButtonA) and self.bGrounded then
-			-- self.bDesireJump = true
+		if pd.buttonJustPressed(pd.kButtonA) then
+			if self.bGrounded then
+				self.PhysicsComponent.velocity.y = -8
+				self.bJumped = true
+			else
+				self.bDesireJump = true
+				pd.frameTimer.performAfterDelay(5, function ()
+					self.bDesireJump = false
+				end)
+			end
+		end
+
+		-- NOTE: Buffer jump
+		if self.bGrounded and self.bDesireJump then
 			self.PhysicsComponent.velocity.y = -8
 			self.bJumped = true
+			self.bDesireJump = false
 		end
 
 		-- NOTE: This is so the player falls faster in their descent, doesn't apply when they walk off the edge
@@ -379,20 +392,6 @@ function Player:update()
 		else
 			self.gravityScale = 1
 		end
-
-		-- local newGravity = (2 * self.jumpHeight) / (self.timeToJumpApex * self.timeToJumpApex)
-		-- self.gravityScale = (newGravity / Gravity) * self.gravMultiplier
-		--
-		-- if self.bDesireJump then
-		-- 	self:jump(Gravity)
-		-- else
-		-- 	if self.PhysicsComponent.velocity.y == 0 then
-		-- 		self.gravMultiplier = 1
-		-- 	elseif self.PhysicsComponent.velocity.y > 0.01 then
-		-- 		local downwardMovementMultiplier = 0.3
-		-- 		self.gravMultiplier = downwardMovementMultiplier
-		-- 	end
-		-- end
 
 		self:handleWalk()
 
