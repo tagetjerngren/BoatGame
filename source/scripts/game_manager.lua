@@ -348,8 +348,8 @@ function GameManager:goToLevel(level_name)
 	end
 
 	-- Draw data to minimap
-	self:updateMiniMap(level_name)
-	self:updateMiniMapHighlight()
+	-- self:updateMiniMap(level_name)
+	-- self:updateMiniMapHighlight()
 	-- self:highlightLevelMiniMap(level_name)
 
 	self.entityInstance = {}
