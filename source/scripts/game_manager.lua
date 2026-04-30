@@ -149,7 +149,11 @@ function GameManager:init(bLoadGame)
 	local SaveData = LoadGame(self)
 	if bLoadGame then
 		self.collectedEntities = SaveData["CollectedEntities"]
-		self.player = Player(SaveData["PlayerX"], SaveData["PlayerY"], self)
+
+		self.playerInstance = Player(SaveData["PlayerX"], SaveData["PlayerY"], self)
+		self.playerBoatInstance = PlayerBoat(0, 0, gfx.image.new("images/PlayerBoat"), 5, self)
+
+		self.player = self.playerInstance
 		self.player.coins = SaveData["PlayerCoins"]
 		self.player.weaponTier = SaveData["PlayerWeaponTier"]
 		self.player.lightRadius = SaveData["PlayerLightRadius"]
@@ -194,7 +198,11 @@ function GameManager:init(bLoadGame)
 		local StartLevel = "Starting_Area"
 
 		self.collectedEntities = {}
-		self.player = Player(0, 0, self)
+
+		self.playerInstance = Player(0, 0, self)
+		self.playerBoatInstance = PlayerBoat(0, 0, gfx.image.new("images/PlayerBoat"), 5, self)
+
+		self.player = self.playerInstance
 		local level_rect = LDtk.get_rect("Starting_Area")
 		self.LevelWidth, self.LevelHeight = level_rect.width, level_rect.height
 		self.water = Water(100, self.LevelWidth, 0, self.LevelHeight, 0.1, WaterParticleDensity)

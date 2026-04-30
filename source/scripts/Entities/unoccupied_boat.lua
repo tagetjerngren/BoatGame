@@ -43,7 +43,12 @@ function UnoccupiedBoat:update()
 		for _, sprite in ipairs(CollidingWithSprites) do
 			if sprite:isa(Player) then
 				self.GameManager.player:remove()
-				self.GameManager.player = PlayerBoat(self.x, self.y, gfx.image.new("images/PlayerBoat"), 5, self.GameManager)
+				-- self.GameManager.player = PlayerBoat(self.x, self.y, gfx.image.new("images/PlayerBoat"), 5, self.GameManager)
+				self.GameManager.player = self.GameManager.playerBoatInstance
+				self.GameManager.player:moveTo(self.x, self.y)
+				self.GameManager.player.PhysicsComponent.position.x = self.x
+				self.GameManager.player.PhysicsComponent.position.y = self.y
+
 				table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.player.PhysicsComponent)
 				self.GameManager.player:add()
 

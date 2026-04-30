@@ -258,7 +258,11 @@ function PlayerBoat:update()
 
 	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
 		self.GameManager.player:remove()
-		self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
+		-- self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
+		self.GameManager.player = self.GameManager.playerInstance
+		self.GameManager.player:moveTo(self.GameManager.playerBoatInstance.x, self.GameManager.playerBoatInstance.y)
+		self.GameManager.player.PhysicsComponent.position.x = self.GameManager.player.x
+		self.GameManager.player.PhysicsComponent.position.y = self.GameManager.player.y
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
 
 		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)
