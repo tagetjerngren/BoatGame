@@ -152,6 +152,11 @@ function GameManager:remove(object)
 	end
 end
 
+function GameManager:removeAll()
+	gfx.sprite.removeAll()
+	self.activeObjects = {}
+end
+
 function GameManager:setUpGame(bLoadGame)
 	local SaveData = LoadGame(self)
 	if bLoadGame then
@@ -370,7 +375,7 @@ function GameManager:goToLevel(level_name)
 			end
 		end
 	end
-	gfx.sprite.removeAll()
+	self:removeAll()
 	self:add(self.player)
 	self:add(self.water)
 	self:add(self.ui)
