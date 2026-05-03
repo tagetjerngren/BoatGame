@@ -41,7 +41,7 @@ local sprite_update <const> = gfx.sprite.update
 local update_timers <const> = pd.timer.updateTimers
 
 UISystem = UI()
-GameManagerInstance = nil
+GameManagerInstance = GameManager()
 
 math.randomseed(playdate.getSecondsSinceEpoch())
 
@@ -122,6 +122,7 @@ function MainGameLoop()
 	GameManagerInstance:UpdatePhysicsComponentsBuoyancy()
 
 	update_timers()
+	GameManagerInstance:updateObjects()
 	sprite_update()
 	pd.frameTimer.updateTimers()
 
@@ -154,13 +155,13 @@ function MainMenuLoop()
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			GameManagerInstance = GameManager(mainMenu.loadGame)
+			GameManagerInstance:setUpGame(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		else
 			if not pd.isSimulator then
 				LDtk.load("levels/world.ldtk", true)
 			end
-			GameManagerInstance = GameManager(mainMenu.loadGame)
+			GameManagerInstance:setUpGame(mainMenu.loadGame)
 			pd.update = MainGameLoop
 		end
 	end
@@ -179,7 +180,7 @@ function IntroLoop()
 		if not pd.isSimulator then
 			LDtk.load("levels/world.ldtk", true)
 		end
-		GameManagerInstance = GameManager(mainMenu.loadGame)
+		GameManagerInstance:setUpGame(mainMenu.loadGame)
 		pd.update = MainGameLoop
 	end
 end

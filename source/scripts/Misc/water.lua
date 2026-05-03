@@ -168,7 +168,7 @@ function Water:Spring()
 	end
 end
 
-function Water:update()
+function Water:updateObject()
 	if self.bActive and self.bWaterWheelPossessed then
 		if self.bOldSystem then
 			local change, _ = pd.getCrankChange()
@@ -209,7 +209,9 @@ function Water:update()
 
 	self:Spring()
 	self:UpdateWaves()
+end
 
+function Water:update()
 	gfx.setColor(gfx.kColorWhite)
 	for i = 1, #self.pointPositions - 1 do
 		-- gfx.drawCircleAtPoint(self.pointPositions[i][1], self.pointPositions[i][2], 3)

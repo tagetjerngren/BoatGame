@@ -131,21 +131,28 @@ function GameManager:DebugMenu()
 	end)
 end
 
-function GameManager:init(bLoadGame)
-	self.miniMap = pd.datastore.readImage("MiniMap/miniMap")
-	if self.miniMap then
-		self.miniMapWithHighlight = pd.datastore.readImage("MiniMap/displayMiniMap")
-	else
-		self.miniMap = gfx.image.new(1000, 1000)
-		self.miniMapWithHighlight = self.miniMap:copy()
+function GameManager:add(object)
+	table.insert(self.activeObjects, object)
+	object:add()
+end
+
+function GameManager:remove(object)
+	local removeIndex = 0
+	for i = 1, #self.activeObjects do
+		if self.activeObjects[i] == object then
+			removeIndex = i
+			break
+		end
 	end
+	if removeIndex == 0 then
+		print("ERROR: Called remove on object that wasn't added: "..object.className)
+	else
+		table.remove(self.activeObjects, removeIndex)
+		object:remove()
+	end
+end
 
-	self.ActivePhysicsComponents = {}
-
-	self.PlayerData = PlayerData()
-
-	self.ui = UISystem
-	self.songManager = pd.sound.fileplayer.new()
+function GameManager:setUpGame(bLoadGame)
 	local SaveData = LoadGame(self)
 	if bLoadGame then
 		self.collectedEntities = SaveData["CollectedEntities"]
@@ -221,17 +228,34 @@ function GameManager:init(bLoadGame)
 		-- self.water.height = self.SpawnY
 		self.water:SetHeight(self.UnoccupiedBoatSpawnY)
 	end
+end
+
+function GameManager:init()
+	self.activeObjects = {}
+	-- self.miniMap = pd.datastore.readImage("MiniMap/miniMap")
+	-- if self.miniMap then
+	-- 	self.miniMapWithHighlight = pd.datastore.readImage("MiniMap/displayMiniMap")
+	-- else
+	-- 	self.miniMap = gfx.image.new(1000, 1000)
+	-- 	self.miniMapWithHighlight = self.miniMap:copy()
+	-- end
+
+	self.ActivePhysicsComponents = {}
+
+	self.PlayerData = PlayerData()
+
+	self.ui = UISystem
+	self.songManager = pd.sound.fileplayer.new()
 
 	self.menu = pd.getSystemMenu()
-
 
 	-- self.menuItem, self.error = self.menu:addMenuItem("Swap Crank", function()
 	-- 	self.water.bOldSystem = not self.water.bOldSystem
 	-- end)
 
-	self.menuItem, self.error = self.menu:addCheckmarkMenuItem("Old Crank", self.water.bOldSystem, function(value)
-		self.water.bOldSystem = value
-	end)
+	-- self.menuItem, self.error = self.menu:addCheckmarkMenuItem("Old Crank", self.water.bOldSystem, function(value)
+	-- 	self.water.bOldSystem = value
+	-- end)
 
 	self.menuItem2, error = self.menu:addMenuItem("View Samples", function ()
 		self:DeactivatePhysicsComponents()
@@ -246,6 +270,19 @@ end
 function GameManager:collect(entityIid)
 	self.collectedEntities[entityIid] = true
 	table.insert(self.collectedEntities, entityIid)
+end
+
+function GameManager:updateObjects()
+	-- print("Updating!")
+	for i = 1, #self.activeObjects do
+		if self.activeObjects[i] then
+			-- print(self.activeObjects[i].className)
+			if self.activeObjects[i].updateObject then
+				self.activeObjects[i]:updateObject()
+			end
+		end
+	end
+	-- print("")
 end
 
 function GameManager:enterRoom(door, direction)
@@ -334,24 +371,24 @@ function GameManager:goToLevel(level_name)
 		end
 	end
 	gfx.sprite.removeAll()
-	self.player:add()
-	self.water:add()
-	self.ui:add()
+	self:add(self.player)
+	self:add(self.water)
+	self:add(self.ui)
 
 	if self.PlayerData.bHoldingObject then
-		self.PlayerData.HeldObject:add()
+		self:add(self.PlayerData.HeldObject)
 	end
 
 	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
-		self.unoccupiedBoat:add()
-		self.unoccupiedBoat.notif:add()
+		self:add(self.unoccupiedBoat)
+		self:add(self.unoccupiedBoat.notif)
 	end
 
 	if self.playerCorpse and self.playerCorpse.level == level_name then
-		self.playerCorpse:add()
+		self:add(self.playerCorpse)
 	end
 	if self.player.companion then
-		self.player.companion:add()
+		self:add(self.player.companion)
 		self.player.companion:moveTo(self.player.x, self.player.y)
 	end
 

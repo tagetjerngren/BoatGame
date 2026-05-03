@@ -102,7 +102,8 @@ function Player:damage(amount, iFrames)
 		Explosion(self.x, self.y)
 		self:setVisible(false)
 		self.bActive = false
-		self:remove()
+		-- self:remove()
+		self.GameManager:remove(self)
 		pd.timer.performAfterDelay(1000, function ()
 			self:Respawn()
 		end)
@@ -115,7 +116,8 @@ function Player:knockback(force)
 end
 
 function Player:Respawn()
-	self:add()
+	-- self:add()
+	self.GameManager:add(self)
 	self.PlayerData.PlayerHealth = self.PlayerData.PlayerMaxHealth
 
 	self.GameManager.playerCorpse = PlayerCorpse(self.x, self.y, self.GameManager.currentLevel, self.GameManager, self.PlayerData.coins, self.direction)
@@ -351,7 +353,7 @@ function Player:saveGroundedPosition()
 	end
 end
 
-function Player:update()
+function Player:updateObject()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity * self.gravityScale)
 	-- print("Gravity: "..Gravity * self.gravityScale)

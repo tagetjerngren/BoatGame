@@ -18,7 +18,8 @@ function DpadNotif:init(x, y, width, height)
 
 	self.width = width
 
-	self:add()
+	-- self:add()
+	GameManagerInstance:add(self)
 
 	self.bCollected = false
 
@@ -26,7 +27,7 @@ function DpadNotif:init(x, y, width, height)
 	self.bPlayerMustBeGrounded = true
 end
 
-function DpadNotif:update()
+function DpadNotif:updateObject()
 	local spritesInArea = self:overlappingSprites()
 	local bPlayerInRect = false
 	local player = nil

@@ -11,7 +11,8 @@ function Offering:init(x, y, entity)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups({COLLISION_GROUPS.PLAYER, COLLISION_GROUPS.WALL})
 	self.PhysicsComponent = PhysicsComponent(x, y, 10)
-	self:add()
+	-- self:add()
+	GameManagerInstance:add(self)
 end
 
 function Offering:collisionResponse(other)
@@ -77,7 +78,7 @@ function Offering:keepWithinMap()
 	end
 end
 
-function Offering:update()
+function Offering:updateObject()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity)
 

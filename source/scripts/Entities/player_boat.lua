@@ -76,7 +76,8 @@ function PlayerBoat:damage(amount, iFrames)
 		Explosion(self.x, self.y)
 		self:setVisible(false)
 		self.bActive = false
-		self:remove()
+		-- self:remove()
+		self.GameManager:remove(self)
 		pd.timer.performAfterDelay(1000, function ()
 			self:Respawn()
 		end)
@@ -148,7 +149,7 @@ function PlayerBoat:collisionResponse(other)
 	assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
-function PlayerBoat:update()
+function PlayerBoat:updateObject()
 	local Gravity = 0.5
 	if self.PhysicsComponent.bBuoyant or not self.bUnderwater then
 		self.PhysicsComponent:addForce(0, Gravity)
@@ -257,7 +258,9 @@ function PlayerBoat:update()
 	end
 
 	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
-		self.GameManager.player:remove()
+		-- self.GameManager.player:remove()
+		print("Remove boat")
+		self.GameManager:remove(self.GameManager.player)
 		-- self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
 		self.GameManager.player = self.GameManager.playerInstance
 		self.GameManager.player:moveTo(self.GameManager.playerBoatInstance.x, self.GameManager.playerBoatInstance.y)
@@ -266,8 +269,9 @@ function PlayerBoat:update()
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
 
 		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)
-		self.GameManager.player:add()
-		self.GameManager.unoccupiedBoat:add()
+
+		self.GameManager:add(self.GameManager.player)
+		self.GameManager:add(self.GameManager.unoccupiedBoat)
 
 		-- TODO: This loop and comparing feels pretty bad, make the array a map instead so it's easier to grab specific objects
 		for i, v in ipairs(self.GameManager.ActivePhysicsComponents) do
@@ -276,7 +280,7 @@ function PlayerBoat:update()
 				break
 			end
 		end
-		self:remove()
+		-- self.GameManager:remove(self)
 	end
 
 	self.PlayerData:DrawBoatHud()
