@@ -194,10 +194,10 @@ function GameManager:CollisionResolution(Pairs)
 		local topLeft = pd.geometry.point.new(x1 - xCenter1 * width1, y1 - yCenter1 * height1)
 		local bottomRight = pd.geometry.point.new(x1 + (1 - xCenter1) * width1, y1 + (1 - yCenter1) * height1)
 
-		gfx.setColor(gfx.kColorWhite)
-		gfx.fillCircleAtPoint(topLeft.x, topLeft.y, 2)
-		gfx.fillCircleAtPoint(bottomRight.x, bottomRight.y, 2)
-		gfx.drawRect(topLeft.x, topLeft.y, width1, height1)
+		-- gfx.setColor(gfx.kColorWhite)
+		-- gfx.fillCircleAtPoint(topLeft.x, topLeft.y, 2)
+		-- gfx.fillCircleAtPoint(bottomRight.x, bottomRight.y, 2)
+		-- gfx.drawRect(topLeft.x, topLeft.y, width1, height1)
 
 		local x2, y2 = Pairs[i][2].x, Pairs[i][2].y
 		local xColl2, yColl2, width2, height2 = Pairs[i][2]:getCollideBounds()
@@ -206,9 +206,9 @@ function GameManager:CollisionResolution(Pairs)
 		local topLeft2 = pd.geometry.point.new(x2 - xCenter2 * width2, y2 - yCenter2 * height2)
 		local bottomRight2 = pd.geometry.point.new(x2 + (1 - xCenter2) * width2, y2 + (1 - yCenter2) * height2)
 
-		gfx.fillCircleAtPoint(topLeft2.x, topLeft2.y, 2)
-		gfx.fillCircleAtPoint(bottomRight2.x, bottomRight2.y, 2)
-		gfx.drawRect(topLeft2.x, topLeft2.y, width2, height2)
+		-- gfx.fillCircleAtPoint(topLeft2.x, topLeft2.y, 2)
+		-- gfx.fillCircleAtPoint(bottomRight2.x, bottomRight2.y, 2)
+		-- gfx.drawRect(topLeft2.x, topLeft2.y, width2, height2)
 
 		local xAxis = {topLeft.x, bottomRight.x, topLeft2.x, bottomRight2.x}
 		table.sort(xAxis)
@@ -234,11 +234,11 @@ function GameManager:CollisionResolution(Pairs)
 				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x + OverlapWidth * -Direction * MoveAmount2, Pairs[i][2].PhysicsComponent.position.y)
 			end
 
-			if Pairs[i][1].PhysicsComponent.velocity.x/math.abs(Pairs[i][1].PhysicsComponent.velocity.x) == -Direction then
+			if Pairs[i][1].PhysicsComponent.velocity.x ~= 0 and Pairs[i][1].PhysicsComponent.velocity.x/math.abs(Pairs[i][1].PhysicsComponent.velocity.x) == -Direction then
 				Pairs[i][1].PhysicsComponent.velocity.x = 0
 			end
 
-			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.x/math.abs(Pairs[i][2].PhysicsComponent.velocity.x) == -Direction then
+			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.x ~= 0 and Pairs[i][2].PhysicsComponent.velocity.x/math.abs(Pairs[i][2].PhysicsComponent.velocity.x) == Direction then
 				Pairs[i][2].PhysicsComponent.velocity.x = 0
 			end
 		else
@@ -261,7 +261,7 @@ function GameManager:CollisionResolution(Pairs)
 				Pairs[i][1].PhysicsComponent.velocity.y = 0
 			end
 
-			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.y/math.abs(Pairs[i][2].PhysicsComponent.velocity.y) == -Direction then
+			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.y/math.abs(Pairs[i][2].PhysicsComponent.velocity.y) == Direction then
 				Pairs[i][2].PhysicsComponent.velocity.y = 0
 			end
 
@@ -269,8 +269,9 @@ function GameManager:CollisionResolution(Pairs)
 				Pairs[i][1].PhysicsComponent.bGrounded = true
 				Pairs[i][1].bGrounded = true
 			end
-			if Pairs[i][2].PhysicsComponent and Direction == -1 then
+			if Pairs[i][2].PhysicsComponent and Direction == 1 then
 				Pairs[i][2].PhysicsComponent.bGrounded = true
+				Pairs[i][2].bGrounded = true
 			end
 		end
 	end
