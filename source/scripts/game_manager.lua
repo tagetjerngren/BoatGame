@@ -157,6 +157,112 @@ function GameManager:removeAll()
 	self.activeObjects = {}
 end
 
+function GameManager:addPhysicsObject(object)
+	table.insert(self.physicsObjects, object)
+end
+
+function GameManager:UpdatePhysics()
+	for i = 1, #self.physicsObjects do
+		if self.physicsObjects[i].PhysicsComponent then
+			self.physicsObjects[i].PhysicsComponent:move(self.physicsObjects[i])
+		end
+	end
+end
+
+function GameManager:CollisionDetection()
+	local CollisionPairs = {}
+	for i = 1, #self.physicsObjects do
+		local OverlappingSprites = self.physicsObjects[i]:overlappingSprites()
+		for j = 1, #OverlappingSprites do
+			if self.physicsObjects[i].collisionResponse and self.physicsObjects[i]:collisionResponse(OverlappingSprites[j]) == "overlap" then
+				goto continue
+			end
+			table.insert(CollisionPairs, {self.physicsObjects[i], OverlappingSprites[j]})
+			::continue::
+		end
+	end
+
+	return CollisionPairs
+end
+
+function GameManager:CollisionResolution(Pairs)
+	for i = 1, #Pairs do
+		local x1, y1 = Pairs[i][1].x, Pairs[i][1].y
+		local xColl1, yColl1, width1, height1 = Pairs[i][1]:getCollideBounds()
+		local xCenter1, yCenter1 = Pairs[i][1]:getCenter()
+
+		local topLeft = pd.geometry.point.new(x1 - xCenter1 * width1, y1 - yCenter1 * height1)
+		local bottomRight = pd.geometry.point.new(x1 + (1 - xCenter1) * width1, y1 + (1 - yCenter1) * height1)
+
+		gfx.setColor(gfx.kColorWhite)
+		gfx.fillCircleAtPoint(topLeft.x, topLeft.y, 2)
+		gfx.fillCircleAtPoint(bottomRight.x, bottomRight.y, 2)
+		gfx.drawRect(topLeft.x, topLeft.y, width1, height1)
+
+		local x2, y2 = Pairs[i][2].x, Pairs[i][2].y
+		local xColl2, yColl2, width2, height2 = Pairs[i][2]:getCollideBounds()
+		local xCenter2, yCenter2 = Pairs[i][2]:getCenter()
+
+		local topLeft2 = pd.geometry.point.new(x2 - xCenter2 * width2, y2 - yCenter2 * height2)
+		local bottomRight2 = pd.geometry.point.new(x2 + (1 - xCenter2) * width2, y2 + (1 - yCenter2) * height2)
+
+		gfx.fillCircleAtPoint(topLeft2.x, topLeft2.y, 2)
+		gfx.fillCircleAtPoint(bottomRight2.x, bottomRight2.y, 2)
+		gfx.drawRect(topLeft2.x, topLeft2.y, width2, height2)
+
+		local xAxis = {topLeft.x, bottomRight.x, topLeft2.x, bottomRight2.x}
+		table.sort(xAxis)
+
+		local yAxis = {topLeft.y, bottomRight.y, topLeft2.y, bottomRight2.y}
+		table.sort(yAxis)
+
+		local OverlapWidth = xAxis[3] - xAxis[2]
+		local OverlapHeight = yAxis[3] - yAxis[2]
+
+		if OverlapWidth < OverlapHeight then
+			local Direction = (topLeft.x - topLeft2.x) / math.abs(topLeft.x - topLeft2.x) -- 1 or -1
+			-- NOTE: Separate the objects on the x axis
+			if Pairs[i][1].PhysicsComponent then
+				Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x + OverlapWidth * Direction, Pairs[i][1].PhysicsComponent.position.y)
+				if Pairs[i][1].PhysicsComponent.velocity.x/math.abs(Pairs[i][1].PhysicsComponent.velocity.x) == -Direction then
+					Pairs[i][1].PhysicsComponent.velocity.x = 0
+				end
+			end
+			if Pairs[i][2].PhysicsComponent then
+				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x + OverlapWidth * Direction, Pairs[i][2].PhysicsComponent.position.y)
+				if Pairs[i][2].PhysicsComponent.velocity.x/math.abs(Pairs[i][2].PhysicsComponent.velocity.x) == -Direction then
+					Pairs[i][2].PhysicsComponent.velocity.x = 0
+				end
+			end
+		else
+			-- NOTE: Separate the objects on the y axis
+			-- NOTE: The first in the pair will always be a physics object, the second object though might not be
+			local Direction = (topLeft.y - topLeft2.y) / math.abs(topLeft.y - topLeft2.y) -- 1 or -1
+
+			local MoveAmount1 = 0.5
+			if Pairs[i][2].PhysicsComponent == nil then
+				MoveAmount1 = 1
+			end
+			local MoveAmount2 = 1 - MoveAmount1
+
+			if Pairs[i][1].PhysicsComponent then
+				Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x, Pairs[i][1].PhysicsComponent.position.y + OverlapHeight * Direction)
+				Pairs[i][1].bGrounded = true
+				local yVelocityNormalized = Pairs[i][1].PhysicsComponent.velocity.y/math.abs(Pairs[i][1].PhysicsComponent.velocity.y)
+				if yVelocityNormalized == -Direction then
+					Pairs[i][1].PhysicsComponent.velocity.y = 0
+				end
+			end
+			if Pairs[i][2].PhysicsComponent then
+				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x, Pairs[i][2].PhysicsComponent.position.y + OverlapHeight * Direction)
+				if Pairs[i][2].PhysicsComponent.velocity.y/math.abs(Pairs[i][2].PhysicsComponent.velocity.y) == -Direction then
+					Pairs[i][2].PhysicsComponent.velocity.y = 0
+				end
+			end
+		end
+	end
+end
+
 function GameManager:setUpGame(bLoadGame)
 	local SaveData = LoadGame(self)
 	if bLoadGame then
@@ -222,12 +328,12 @@ function GameManager:setUpGame(bLoadGame)
 
 		self:goToLevel(StartLevel)
 
-		self.player:moveTo(self.SpawnX, self.SpawnY)
-		self.player.PhysicsComponent:setPosition(self.SpawnX, self.SpawnY)
+		-- self.player:moveTo(self.SpawnX, self.SpawnY)
+		self.player.PhysicsComponent:setPosition(self.player, self.SpawnX, self.SpawnY)
 
-		self.unoccupiedBoat:moveTo(self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
+		-- self.unoccupiedBoat:moveTo(self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
 		self.unoccupiedBoat.notif:moveTo(self.UnoccupiedBoatSpawnX - 32, self.UnoccupiedBoatSpawnY - 32)
-		self.unoccupiedBoat.PhysicsComponent:setPosition(self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
+		self.unoccupiedBoat.PhysicsComponent:setPosition(self.unoccupiedBoat, self.UnoccupiedBoatSpawnX, self.UnoccupiedBoatSpawnY)
 
 		self.camera:center(self.player.x, self.player.y)
 		-- self.water.height = self.SpawnY
@@ -237,6 +343,7 @@ end
 
 function GameManager:init()
 	self.activeObjects = {}
+	self.physicsObjects = {}
 	-- self.miniMap = pd.datastore.readImage("MiniMap/miniMap")
 	-- if self.miniMap then
 	-- 	self.miniMapWithHighlight = pd.datastore.readImage("MiniMap/displayMiniMap")
@@ -277,17 +384,78 @@ function GameManager:collect(entityIid)
 	table.insert(self.collectedEntities, entityIid)
 end
 
-function GameManager:updateObjects()
-	-- print("Updating!")
+function GameManager:earlyUpdateObjects()
 	for i = 1, #self.activeObjects do
 		if self.activeObjects[i] then
-			-- print(self.activeObjects[i].className)
+			if self.activeObjects[i].earlyUpdateObject then
+				self.activeObjects[i]:earlyUpdateObject()
+			end
+		end
+	end
+end
+
+function GameManager:updateObjects()
+	for i = 1, #self.activeObjects do
+		if self.activeObjects[i] then
 			if self.activeObjects[i].updateObject then
 				self.activeObjects[i]:updateObject()
 			end
 		end
 	end
-	-- print("")
+end
+
+function GameManager:lateUpdateObjects()
+	for i = 1, #self.activeObjects do
+		if self.activeObjects[i] then
+			if self.activeObjects[i].lateUpdateObject then
+				self.activeObjects[i]:lateUpdateObject()
+			end
+		end
+	end
+end
+
+function GameManager:checkIfPlayerOutOfLevel()
+	if self.player.x > self.LevelWidth and self.player.PhysicsComponent.velocity.x > 0 then
+		self:enterRoom(self.player.Door, "EAST")
+	elseif self.player.x < 0 and self.player.PhysicsComponent.velocity.x < 0 then
+		self:enterRoom(self.player.Door, "WEST")
+	elseif self.player.y - 16 > self.LevelHeight and self.player.PhysicsComponent.velocity.y > 0 then
+		self:enterRoom(self.player.Door, "SOUTH")
+	elseif self.player.y - 16 < 0 and self.player.PhysicsComponent.velocity.y < 0 then
+		self:enterRoom(self.player.Door, "NORTH")
+	end
+end
+
+function GameManager:checkDoorTriggers()
+	local OverlappingPlayerSprites = self.player:overlappingSprites()
+
+	for i = 1, #OverlappingPlayerSprites do
+		if OverlappingPlayerSprites[i]:isa(DoorTrigger) and OverlappingPlayerSprites[i].bTransitionOnEnter then
+			-- NOTE: This just puts the player in EAST transition, doesn't always make sense
+			local PlayerVelocityX = self.player.PhysicsComponent.velocity.x
+			local PlayerToDoorX = OverlappingPlayerSprites[i].x - self.player.PhysicsComponent.position.x
+			PlayerVelocityX = PlayerVelocityX / abs(PlayerVelocityX)
+			PlayerToDoorX = PlayerToDoorX / abs(PlayerToDoorX)
+
+			if PlayerVelocityX == PlayerToDoorX then
+				if PlayerVelocityX > 0 then
+					self:enterRoom(OverlappingPlayerSprites[i], "EAST")
+				else
+					self:enterRoom(OverlappingPlayerSprites[i], "WEST")
+				end
+			end
+		elseif OverlappingPlayerSprites[i]:isa(InteractDoorTrigger) then
+			if pd.buttonJustPressed(pd.kButtonUp) then
+				if self.player:isa(Player) then 
+					if self.player.bGrounded then
+						self:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
+					end
+				else
+					self:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
+				end
+			end
+		end
+	end
 end
 
 function GameManager:enterRoom(door, direction)
@@ -307,9 +475,7 @@ function GameManager:enterRoom(door, direction)
 		self.player:moveTo(self.player.x + xDiff, door.TargetY)
 	end
 
-	-- Set their velocity to zero
 	self.player.PhysicsComponent:setVelocity(0, 0)
-	-- self.player.PhysicsComponent.Velocity = playdate.geometry.vector2D.new(0, 0)
 
 	-- Set the water height and width
 	local level_rect = LDtk.get_rect(door.TargetLevel)
@@ -377,16 +543,19 @@ function GameManager:goToLevel(level_name)
 	end
 	self:removeAll()
 	self:add(self.player)
+	self:addPhysicsObject(self.player)
 	self:add(self.water)
 	self:add(self.ui)
 
 	if self.PlayerData.bHoldingObject then
 		self:add(self.PlayerData.HeldObject)
+		self:addPhysicsObject(self.PlayerData.HeldObject)
 	end
 
 	if self.unoccupiedBoat and self.unoccupiedBoat.level == level_name then
 		self:add(self.unoccupiedBoat)
 		self:add(self.unoccupiedBoat.notif)
+		self:addPhysicsObject(self.unoccupiedBoat)
 	end
 
 	if self.playerCorpse and self.playerCorpse.level == level_name then

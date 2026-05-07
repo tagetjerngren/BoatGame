@@ -173,7 +173,9 @@ function Player:collisionResponse(other)
 		return "overlap"
 	end
 
-	assert(false, "Couldn't figure out how we wanted to respond to the collision")
+	return "overlap"
+
+	-- assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
 function Player:calculateGrounded(collisions)
@@ -428,7 +430,7 @@ function Player:updateObject()
 		end
 	end
 
-	self:calculateGrounded(collisions)
+	-- self:calculateGrounded(collisions)
 
 	-- NOTE: Resets the jumped state when the player is on the ground
 	if self.bGrounded then
@@ -447,4 +449,6 @@ function Player:updateObject()
 		self.Invincible -= 1
 	end
 	self:saveGroundedPosition()
+
+	self.bGrounded = false
 end

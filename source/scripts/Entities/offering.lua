@@ -13,6 +13,7 @@ function Offering:init(x, y, entity)
 	self.PhysicsComponent = PhysicsComponent(x, y, 10)
 	-- self:add()
 	GameManagerInstance:add(self)
+	GameManagerInstance:addPhysicsObject(self)
 end
 
 function Offering:collisionResponse(other)
@@ -89,10 +90,10 @@ function Offering:updateObject()
 	self.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > GameManagerInstance.water.height
-	for i = 1, #collisions do
-		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
-			self.bGrounded = true
-		end
-	end
+	-- for i = 1, #collisions do
+	-- 	if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
+	-- 		self.bGrounded = true
+	-- 	end
+	-- end
 	self:keepWithinMap()
 end

@@ -73,56 +73,19 @@ function MainGameLoop()
 
 	UISystem:clear()
 
-	-- NOTE: Moves the player to a new room if they leave the bounds
-	-- This used to be in the player but lead to some weird behavior 
-	-- with other sprites having one more frame to update even though 
-	-- they should have been deleted
+	GameManagerInstance:checkIfPlayerOutOfLevel()
 
-	if GameManagerInstance.player.x > GameManagerInstance.LevelWidth and GameManagerInstance.player.PhysicsComponent.velocity.x > 0 then
-		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "EAST")
-	elseif GameManagerInstance.player.x < 0 and GameManagerInstance.player.PhysicsComponent.velocity.x < 0 then
-		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "WEST")
-	elseif GameManagerInstance.player.y - 16 > GameManagerInstance.LevelHeight and GameManagerInstance.player.PhysicsComponent.velocity.y > 0 then
-		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "SOUTH")
-	elseif GameManagerInstance.player.y - 16 < 0 and GameManagerInstance.player.PhysicsComponent.velocity.y < 0 then
-		GameManagerInstance:enterRoom(GameManagerInstance.player.Door, "NORTH")
-	end
-
-	local OverlappingPlayerSprites = GameManagerInstance.player:overlappingSprites()
-
-
-	for i = 1, #OverlappingPlayerSprites do
-		if OverlappingPlayerSprites[i]:isa(DoorTrigger) and OverlappingPlayerSprites[i].bTransitionOnEnter then
-			-- NOTE: This just puts the player in EAST transition, doesn't always make sense
-			local PlayerVelocityX = GameManagerInstance.player.PhysicsComponent.velocity.x
-			local PlayerToDoorX = OverlappingPlayerSprites[i].x - GameManagerInstance.player.PhysicsComponent.position.x
-			PlayerVelocityX = PlayerVelocityX / abs(PlayerVelocityX)
-			PlayerToDoorX = PlayerToDoorX / abs(PlayerToDoorX)
-
-			if PlayerVelocityX == PlayerToDoorX then
-				if PlayerVelocityX > 0 then
-					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "EAST")
-				else
-					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], "WEST")
-				end
-			end
-		elseif OverlappingPlayerSprites[i]:isa(InteractDoorTrigger) then
-			if pd.buttonJustPressed(pd.kButtonUp) then
-				if GameManagerInstance.player:isa(Player) then 
-					if GameManagerInstance.player.bGrounded then
-						GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
-					end
-				else
-					GameManagerInstance:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
-				end
-			end
-		end
-	end
+	GameManagerInstance:checkDoorTriggers()
 
 	GameManagerInstance:UpdatePhysicsComponentsBuoyancy()
 
 	update_timers()
+	GameManagerInstance:earlyUpdateObjects()
 	GameManagerInstance:updateObjects()
+	-- GameManagerInstance:UpdatePhysics()
+	local Pairs = GameManagerInstance:CollisionDetection()
+	GameManagerInstance:CollisionResolution(Pairs)
+	GameManagerInstance:lateUpdateObjects()
 	sprite_update()
 	pd.frameTimer.updateTimers()
 
