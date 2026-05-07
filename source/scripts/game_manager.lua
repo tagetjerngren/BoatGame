@@ -222,17 +222,24 @@ function GameManager:CollisionResolution(Pairs)
 		if OverlapWidth < OverlapHeight then
 			local Direction = (topLeft.x - topLeft2.x) / math.abs(topLeft.x - topLeft2.x) -- 1 or -1
 			-- NOTE: Separate the objects on the x axis
-			if Pairs[i][1].PhysicsComponent then
-				Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x + OverlapWidth * Direction, Pairs[i][1].PhysicsComponent.position.y)
-				if Pairs[i][1].PhysicsComponent.velocity.x/math.abs(Pairs[i][1].PhysicsComponent.velocity.x) == -Direction then
-					Pairs[i][1].PhysicsComponent.velocity.x = 0
-				end
+--
+			local MoveAmount1 = 0.5
+			if Pairs[i][2].PhysicsComponent == nil then
+				MoveAmount1 = 1
 			end
+			local MoveAmount2 = 1 - MoveAmount1
+
+			Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x + OverlapWidth * Direction * MoveAmount1, Pairs[i][1].PhysicsComponent.position.y)
 			if Pairs[i][2].PhysicsComponent then
-				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x + OverlapWidth * Direction, Pairs[i][2].PhysicsComponent.position.y)
-				if Pairs[i][2].PhysicsComponent.velocity.x/math.abs(Pairs[i][2].PhysicsComponent.velocity.x) == -Direction then
-					Pairs[i][2].PhysicsComponent.velocity.x = 0
-				end
+				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x + OverlapWidth * -Direction * MoveAmount2, Pairs[i][2].PhysicsComponent.position.y)
+			end
+
+			if Pairs[i][1].PhysicsComponent.velocity.x/math.abs(Pairs[i][1].PhysicsComponent.velocity.x) == -Direction then
+				Pairs[i][1].PhysicsComponent.velocity.x = 0
+			end
+
+			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.x/math.abs(Pairs[i][2].PhysicsComponent.velocity.x) == -Direction then
+				Pairs[i][2].PhysicsComponent.velocity.x = 0
 			end
 		else
 			-- NOTE: Separate the objects on the y axis
@@ -245,19 +252,25 @@ function GameManager:CollisionResolution(Pairs)
 			end
 			local MoveAmount2 = 1 - MoveAmount1
 
-			if Pairs[i][1].PhysicsComponent then
-				Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x, Pairs[i][1].PhysicsComponent.position.y + OverlapHeight * Direction)
-				Pairs[i][1].bGrounded = true
-				local yVelocityNormalized = Pairs[i][1].PhysicsComponent.velocity.y/math.abs(Pairs[i][1].PhysicsComponent.velocity.y)
-				if yVelocityNormalized == -Direction then
-					Pairs[i][1].PhysicsComponent.velocity.y = 0
-				end
-			end
+			Pairs[i][1].PhysicsComponent:setPosition(Pairs[i][1], Pairs[i][1].PhysicsComponent.position.x, Pairs[i][1].PhysicsComponent.position.y + OverlapHeight * Direction * MoveAmount1)
 			if Pairs[i][2].PhysicsComponent then
-				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x, Pairs[i][2].PhysicsComponent.position.y + OverlapHeight * Direction)
-				if Pairs[i][2].PhysicsComponent.velocity.y/math.abs(Pairs[i][2].PhysicsComponent.velocity.y) == -Direction then
-					Pairs[i][2].PhysicsComponent.velocity.y = 0
-				end
+				Pairs[i][2].PhysicsComponent:setPosition(Pairs[i][2], Pairs[i][2].PhysicsComponent.position.x, Pairs[i][2].PhysicsComponent.position.y + OverlapHeight * -Direction * MoveAmount2)
+			end
+
+			if Pairs[i][1].PhysicsComponent.velocity.y/math.abs(Pairs[i][1].PhysicsComponent.velocity.y) == -Direction then
+				Pairs[i][1].PhysicsComponent.velocity.y = 0
+			end
+
+			if Pairs[i][2].PhysicsComponent and Pairs[i][2].PhysicsComponent.velocity.y/math.abs(Pairs[i][2].PhysicsComponent.velocity.y) == -Direction then
+				Pairs[i][2].PhysicsComponent.velocity.y = 0
+			end
+
+			if Pairs[i][1].PhysicsComponent and Direction == -1 then
+				Pairs[i][1].PhysicsComponent.bGrounded = true
+				Pairs[i][1].bGrounded = true
+			end
+			if Pairs[i][2].PhysicsComponent and Direction == -1 then
+				Pairs[i][2].PhysicsComponent.bGrounded = true
 			end
 		end
 	end
