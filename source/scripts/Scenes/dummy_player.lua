@@ -18,7 +18,7 @@ function DummyPlayer:init(x, y, image, speed)
 	self:setCollideRect(4, 10, 26, 22)
 	self.Speed = speed
 
-	self.PhysicsComponent = PhysicsComponent(x, y, 10)
+	self.PhysicsComponent = PhysicsComponent(x, y, 1, 10)
 
 	self.bUnderwater = false
 	self.bCanJump = true

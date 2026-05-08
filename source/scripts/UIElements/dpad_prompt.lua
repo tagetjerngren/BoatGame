@@ -16,7 +16,7 @@ function DpadNotif:init(x, y, width, height)
 	assert(anim)
 	self.animationLoop = gfx.animation.loop.new(300, anim, true)
 
-	self.width = width
+	self.collisionWidth = width
 
 	-- self:add()
 	GameManagerInstance:add(self)
@@ -40,12 +40,12 @@ function DpadNotif:updateObject()
 
 	if bPlayerInRect then
 		if player:isa(Player) and self.bPlayerMustBeGrounded then
-			if player.bGrounded then
-				UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.width / 2 - 16, self.y - 32)
+			-- print("Grounded: "..tostring(player.PhysicsComponent.bGrounded))
+			if player.PhysicsComponent.bGrounded then
+				UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.collisionWidth / 2 - 16, self.y - 32)
 			end
 		else
-			-- self.animationLoop:draw(self.x + 16, self.y - 16)
-			UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.width / 2 - 16, self.y - 32)
+			UISystem:drawImageAtWorld(self.animationLoop:image(), self.x + self.collisionWidth / 2 - 16, self.y - 32)
 		end
 	end
 end

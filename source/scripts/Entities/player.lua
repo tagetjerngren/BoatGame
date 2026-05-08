@@ -45,7 +45,10 @@ function Player:init(x, y, gameManager)
 	self.gravityScale = 1
 	self.gravMultiplier = 1
 
-	self.PhysicsComponent = PhysicsComponent(x, y, 10)
+	local mass = 1
+	local maxVelocity = 10
+
+	self.PhysicsComponent = PhysicsComponent(x, y, mass, maxVelocity)
 
 	self.bUnderwater = false
 	self.bCanJump = true
@@ -221,7 +224,7 @@ function Player:keepPlayerWithinMap()
 end
 
 function Player:calculateState()
-	if not self.bGrounded then
+	if not self.PhysicsComponent.bGrounded then
 		self.state = PLAYER_STATES.IN_AIR
 	else
 		if self.desiredVelocity ~= 0 then
@@ -275,9 +278,9 @@ function Player:setPlayerImage()
 end
 
 function Player:handleWalk()
-	local acceleration = self.bGrounded and self.maxAcceleration or self.maxAirAcceleration
-	local deceleration = self.bGrounded and self.maxDeceleration or self.maxAirDeceleration
-	local turnSpeed = self.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
+	local acceleration = self.PhysicsComponent.bGrounded and self.maxAcceleration or self.maxAirAcceleration
+	local deceleration = self.PhysicsComponent.bGrounded and self.maxDeceleration or self.maxAirDeceleration
+	local turnSpeed = self.PhysicsComponent.bGrounded and self.maxTurnSpeed or self.maxAirTurnSpeed
 
 	self.desiredVelocity = 0
 
@@ -321,7 +324,7 @@ end
 function Player:jump(gravity)
 	self.bDesireJump = false
 
-	if self.bGrounded then
+	if self.PhysicsComponent.bGrounded then
 		local jumpSpeed = math.sqrt(2 * gravity * self.gravityScale * self.jumpHeight)
 
 		if self.PhysicsComponent.velocity.y > 0 then
@@ -338,11 +341,11 @@ end
 -- NOTE: This name sucks and doesn't cover everything it does, reconsider
 function Player:saveGroundedPosition()
 	if self.bUnderwater then
-		self:moveTo(self.LastGroundedX, self.LastGroundedY - 5)
-		self.PhysicsComponent:setPosition(self.x, self.y)
+		-- self:moveTo(self.LastGroundedX, self.LastGroundedY - 5)
+		self.PhysicsComponent:setPosition(self, self.LastGroundedX, self.LastGroundedY - 5)
 		self.PhysicsComponent:setVelocity(0, 0)
 		self:damage(1, 0)
-	elseif self.bGrounded then
+	elseif self.PhysicsComponent.bGrounded then
 		local checkWidth = 5
 		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
 		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
@@ -372,7 +375,7 @@ function Player:updateObject()
 		end
 
 		if pd.buttonJustPressed(pd.kButtonA) then
-			if self.bGrounded then
+			if self.PhysicsComponent.bGrounded then
 				self.PhysicsComponent.velocity.y = -8
 				self.bJumped = true
 			else
@@ -384,7 +387,7 @@ function Player:updateObject()
 		end
 
 		-- NOTE: Buffer jump
-		if self.bGrounded and self.bDesireJump then
+		if self.PhysicsComponent.bGrounded and self.bDesireJump then
 			self.PhysicsComponent.velocity.y = -8
 			self.bJumped = true
 			self.bDesireJump = false
@@ -407,9 +410,9 @@ function Player:updateObject()
 				self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 10)
 			else
 				if self.state == PLAYER_STATES.WALKING and self.animationLoop.frame % 2 == 0 then
-					self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 14 - 1)
+					UISystem:drawImageAtWorld(self.PlayerData.HeldImage, self.x - 8, self.y - 32 - 14 - 1)
 				else
-					self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 14)
+					UISystem:drawImageAtWorld(self.PlayerData.HeldImage, self.x - 8, self.y - 32 - 14)
 				end
 			end
 
@@ -431,9 +434,10 @@ function Player:updateObject()
 	end
 
 	-- self:calculateGrounded(collisions)
+	self.bUnderwater = self.y - 32 > self.GameManager.water.height
 
 	-- NOTE: Resets the jumped state when the player is on the ground
-	if self.bGrounded then
+	if self.PhysicsComponent.bGrounded then
 		self.bJumped = false
 	end
 
@@ -450,5 +454,5 @@ function Player:updateObject()
 	end
 	self:saveGroundedPosition()
 
-	self.bGrounded = false
+	self.PhysicsComponent.bGrounded = false
 end

@@ -10,7 +10,7 @@ function Offering:init(x, y, entity)
 	self:setCollideRect(0, 0, 16, 16)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups({COLLISION_GROUPS.PLAYER, COLLISION_GROUPS.WALL})
-	self.PhysicsComponent = PhysicsComponent(x, y, 10)
+	self.PhysicsComponent = PhysicsComponent(x, y, 1, 10)
 	-- self:add()
 	GameManagerInstance:add(self)
 	GameManagerInstance:addPhysicsObject(self)
@@ -83,11 +83,11 @@ function Offering:updateObject()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity)
 
-	if self.bGrounded or self.bUnderwater then
+	if self.PhysicsComponent.bGrounded or self.bUnderwater then
 		self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.1, 0)
 	end
 
-	self.bGrounded = false
+	self.PhysicsComponent.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > GameManagerInstance.water.height
 	-- for i = 1, #collisions do

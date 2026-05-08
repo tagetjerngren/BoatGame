@@ -223,9 +223,9 @@ function GameManager:CollisionResolution(Pairs)
 			local Direction = (topLeft.x - topLeft2.x) / math.abs(topLeft.x - topLeft2.x) -- 1 or -1
 			-- NOTE: Separate the objects on the x axis
 --
-			local MoveAmount1 = 0.5
-			if Pairs[i][2].PhysicsComponent == nil then
-				MoveAmount1 = 1
+			local MoveAmount1 = 1
+			if Pairs[i][2].PhysicsComponentl then
+				MoveAmount1 = Pairs[i][2].PhysicsComponent.mass / (Pairs[i][1].PhysicsComponent.mass + Pairs[i][2].PhysicsComponent.mass)
 			end
 			local MoveAmount2 = 1 - MoveAmount1
 
@@ -246,9 +246,9 @@ function GameManager:CollisionResolution(Pairs)
 			-- NOTE: The first in the pair will always be a physics object, the second object though might not be
 			local Direction = (topLeft.y - topLeft2.y) / math.abs(topLeft.y - topLeft2.y) -- 1 or -1
 
-			local MoveAmount1 = 0.5
-			if Pairs[i][2].PhysicsComponent == nil then
-				MoveAmount1 = 1
+			local MoveAmount1 = 1
+			if Pairs[i][2].PhysicsComponent then
+				MoveAmount1 = Pairs[i][2].PhysicsComponent.mass / (Pairs[i][1].PhysicsComponent.mass + Pairs[i][2].PhysicsComponent.mass)
 			end
 			local MoveAmount2 = 1 - MoveAmount1
 
@@ -267,11 +267,9 @@ function GameManager:CollisionResolution(Pairs)
 
 			if Pairs[i][1].PhysicsComponent and Direction == -1 then
 				Pairs[i][1].PhysicsComponent.bGrounded = true
-				Pairs[i][1].bGrounded = true
 			end
 			if Pairs[i][2].PhysicsComponent and Direction == 1 then
 				Pairs[i][2].PhysicsComponent.bGrounded = true
-				Pairs[i][2].bGrounded = true
 			end
 		end
 	end
@@ -461,7 +459,7 @@ function GameManager:checkDoorTriggers()
 		elseif OverlappingPlayerSprites[i]:isa(InteractDoorTrigger) then
 			if pd.buttonJustPressed(pd.kButtonUp) then
 				if self.player:isa(Player) then 
-					if self.player.bGrounded then
+					if self.player.PhysicsComponent.bGrounded then
 						self:enterRoom(OverlappingPlayerSprites[i], OverlappingPlayerSprites[i].direction)
 					end
 				else
@@ -514,7 +512,7 @@ function GameManager:enterRoom(door, direction)
 
 	self:goToLevel(door.TargetLevel)
 
-	self.player.PhysicsComponent:setPosition(self.player.x, self.player.y)
+	self.player.PhysicsComponent:setPosition(self.player, self.player.x, self.player.y)
 	self:SetPhysicsComponentsPosition()
 
 	-- NOTE: Bypass the lerp so the camera snaps to place when going to new level

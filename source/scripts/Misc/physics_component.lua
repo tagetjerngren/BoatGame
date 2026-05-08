@@ -3,10 +3,11 @@ local gfx <const> = pd.graphics
 
 class('PhysicsComponent').extends()
 
-function PhysicsComponent:init(x, y, maxVelocity)
+function PhysicsComponent:init(x, y, mass, maxVelocity)
 	self.position = pd.geometry.vector2D.new(x, y)
 	self.velocity = pd.geometry.vector2D.new(0, 0)
 	self.acceleration = pd.geometry.vector2D.new(0, 0)
+	self.mass = mass
 	self.maxVelocity = maxVelocity
 	self.bBuoyant = true
 end
@@ -47,25 +48,5 @@ function PhysicsComponent:move(owner)
 		self.velocity = self.velocity:normalized() * self.maxVelocity
 	end
 
-	-- Actual moving
-	-- local collisions, length
-	-- self.position.x, self.position.y, collisions, length = owner:moveWithCollisions(self.position.x, self.position.y)
 	owner:moveTo(self.position.x, self.position.y)
-
-	-- If we hit a surface set our velocity in that direction to zero 
-	-- NOTE: Kinda hacky, this only works so long as there are no slanted normals, feel free to be more cleverer
-	-- for i = 1, length, 1 do
-	-- 	if collisions[i].other:isa(MovingPlatform) then
-	-- 		print(collisions[i].other.velocity)
-	-- 		self.velocity += collisions[i].other.velocity * 0.25
-	-- 	end
-	--
-	-- 	-- NOTE: So that it allows the player to go through overlap collisions
-	-- 	if collisions[i].type ~= 2 then
-	-- 		self.velocity.x *= math.abs(collisions[i].normal.y)
-	-- 		self.velocity.y *= math.abs(collisions[i].normal.x)
-	-- 	end
-	-- end
-	--
-	-- return collisions, length
 end

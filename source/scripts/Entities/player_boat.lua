@@ -21,7 +21,7 @@ function PlayerBoat:init(x, y, image, speed, gameManager)
 	self:setCollideRect(4, 10, 26, 22)
 	self.Speed = speed
 
-	self.PhysicsComponent = PhysicsComponent(x, y, 10)
+	self.PhysicsComponent = PhysicsComponent(x, y, 10, 10)
 
 	self.bUnderwater = false
 	self.bCanJump = true
@@ -194,7 +194,7 @@ function PlayerBoat:updateObject()
 			end
 		end
 
-		if self.bGrounded and not self.bHasWheels then
+		if self.PhysicsComponent.bGrounded and not self.bHasWheels then
 			if pd.buttonJustPressed(pd.kButtonLeft) then
 				self:setImageFlip(gfx.kImageFlippedX)
 				self.direction = -1
@@ -211,7 +211,7 @@ function PlayerBoat:updateObject()
 		if pd.buttonIsPressed(pd.kButtonLeft) then
 			self:setImageFlip(gfx.kImageFlippedX)
 			self.direction = -1
-			if ((not self.bGrounded) or self.bHasWheels) then
+			if ((not self.PhysicsComponent.bGrounded) or self.bHasWheels) then
 				self.PhysicsComponent.velocity.x = -self.Speed
 			end
 		end
@@ -219,7 +219,7 @@ function PlayerBoat:updateObject()
 		if pd.buttonIsPressed(pd.kButtonRight) then
 			self.direction = 1
 			self:setImageFlip(gfx.kImageUnflipped)
-			if ((not self.bGrounded) or self.bHasWheels) then
+			if ((not self.PhysicsComponent.bGrounded) or self.bHasWheels) then
 				self.PhysicsComponent.velocity.x = self.Speed
 			end
 		end
@@ -240,33 +240,30 @@ function PlayerBoat:updateObject()
 
 	self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
 
-	self.bGrounded = false
+	self.PhysicsComponent.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 
 	if self.PlayerData.bHoldingObject then
-		self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 8)
+		-- self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 8)
+		UISystem:drawImageAtWorld(self.PlayerData.HeldImage, self.x - 8, self.y - 32 - 8)
 	end
 
 	self.bUnderwater = self.y > self.GameManager.water.height
-	for i = 1, #collisions do
-		if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then
-			self:damage(1, 15)
-		end
-		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
-			self.bGrounded = true
-		end
-	end
+	-- for i = 1, #collisions do
+	-- 	if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then
+	-- 		self:damage(1, 15)
+	-- 	end
+	-- 	if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
+	-- 		self.bGrounded = true
+	-- 	end
+	-- end
 
 	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
-		-- self.GameManager.player:remove()
-		print("Remove boat")
 		self.GameManager:remove(self.GameManager.player)
-		-- self.GameManager.player = Player(self.x, self.y - 0, self.GameManager)
 		self.GameManager.player = self.GameManager.playerInstance
-		self.GameManager.player:moveTo(self.GameManager.playerBoatInstance.x, self.GameManager.playerBoatInstance.y)
-		self.GameManager.player.PhysicsComponent.position.x = self.GameManager.player.x
-		self.GameManager.player.PhysicsComponent.position.y = self.GameManager.player.y
+		self.GameManager.player.PhysicsComponent:setPosition(self.GameManager.player, self.GameManager.playerBoatInstance.x, self.GameManager.playerBoatInstance.y)
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
+		self.GameManager:addPhysicsObject(self.GameManager.unoccupiedBoat)
 
 		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)
 
@@ -280,7 +277,6 @@ function PlayerBoat:updateObject()
 				break
 			end
 		end
-		-- self.GameManager:remove(self)
 	end
 
 	self.PlayerData:DrawBoatHud()

@@ -19,7 +19,7 @@ function UnoccupiedBoat:init(x, y, gameManager, level)
 	local CollisionHeight = 4
 	self:setCollideRect(0, 32 - CollisionHeight, 32, CollisionHeight)
 
-	self.PhysicsComponent = PhysicsComponent(x, y, 10)
+	self.PhysicsComponent = PhysicsComponent(x, y, 30, 10)
 
 	self.bUnderwater = false
 	self.bCanJump = true
@@ -42,16 +42,11 @@ function UnoccupiedBoat:updateObject()
 		local CollidingWithSprites = gfx.sprite.querySpritesInRect(self.x - 32, self.y - 32, 64, 64)
 		for _, sprite in ipairs(CollidingWithSprites) do
 			if sprite:isa(Player) then
-				-- self.GameManager.player:remove()
 				self.GameManager:remove(self.GameManager.player)
-				-- self.GameManager.player = PlayerBoat(self.x, self.y, gfx.image.new("images/PlayerBoat"), 5, self.GameManager)
 				self.GameManager.player = self.GameManager.playerBoatInstance
-				self.GameManager.player:moveTo(self.x, self.y)
-				self.GameManager.player.PhysicsComponent.position.x = self.x
-				self.GameManager.player.PhysicsComponent.position.y = self.y
+				self.GameManager.player.PhysicsComponent:setPosition(self.GameManager.player, self.x, self.y)
 
 				table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.player.PhysicsComponent)
-				-- self.GameManager.player:add()
 				self.GameManager:add(self.GameManager.player)
 
 				-- TODO: This loop and comparing feels pretty bad, make the array a map instead so it's easier to grab specific objects
@@ -62,9 +57,7 @@ function UnoccupiedBoat:updateObject()
 					end
 				end
 				self.GameManager:remove(self)
-				-- self:remove()
 				self.GameManager:remove(self.notif)
-				-- self.notif:remove()
 			end
 		end
 	end
@@ -72,4 +65,5 @@ function UnoccupiedBoat:updateObject()
 	local Gravity = 0.5
 	self.PhysicsComponent:addForce(0, Gravity)
 	local collisions, _ = self.PhysicsComponent:move(self)
+	self.notif:moveTo(self.x - 32, self.y - 32)
 end
