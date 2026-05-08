@@ -27,7 +27,7 @@ function Coin:update()
 end
 
 function Coin:collect(player)
-	player.PlayerData:addCoints(1)
+	player.PlayerData:addCoins(1)
 	player.GameManager:collect(self.entity.iid)
 	self.entity.fields.Collected = true
 	self.coinPickupSound:play()
