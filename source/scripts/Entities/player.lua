@@ -64,6 +64,7 @@ function Player:init(x, y, gameManager)
 	self.bActive = true
 
 	self.direction = 1
+	self.cameraProgress = 1
 
 	self.hurtSound = pd.sound.sampleplayer.new("sounds/Hurt")
 	self.PhysicsComponent.bBuoyant = false
@@ -347,8 +348,8 @@ function Player:saveGroundedPosition()
 		self:damage(1, 0)
 	elseif self.PhysicsComponent.bGrounded then
 		local checkWidth = 5
-		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
-		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y, 0, 17, {self}, {"DpadNotif"})
+		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y, 0, 8, {self}, {"DpadNotif"})
+		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y, 0, 8, {self}, {"DpadNotif"})
 		if leftCollisionSprite and rightCollisionSprite then
 			if self:collisionResponse(leftCollisionSprite) == "slide" and self:collisionResponse(rightCollisionSprite) == "slide" then
 				self.LastGroundedX = self.x
@@ -391,6 +392,12 @@ function Player:updateObject()
 			self.PhysicsComponent.velocity.y = -8
 			self.bJumped = true
 			self.bDesireJump = false
+		end
+
+		if not self.bGrounded and pd.buttonJustReleased(pd.kButtonA) then
+			if self.PhysicsComponent.velocity.y < 0 then
+				self.PhysicsComponent.velocity.y = 0
+			end
 		end
 
 		-- NOTE: This is so the player falls faster in their descent, doesn't apply when they walk off the edge
@@ -453,6 +460,9 @@ function Player:updateObject()
 		self.Invincible -= 1
 	end
 	self:saveGroundedPosition()
-
 	self.PhysicsComponent.bGrounded = false
+
+	self.cameraProgress = pd.math.lerp(self.cameraProgress, self.direction, 0.2)
+	self.PlayerData.CameraTarget.x = self.x + self.cameraProgress * 20
+	self.PlayerData.CameraTarget.y = self.y - 30
 end

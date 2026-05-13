@@ -29,9 +29,13 @@ function Camera:center(x, y)
 	self.y = targetY
 end
 
-function Camera:lerp(x, y, speed)
-	local dx = pd.math.lerp(self.x, x, speed)
-	local dy = pd.math.lerp(self.y, y, speed)
+function Camera:lerp(x, y, speedX, speedY)
+	if speedY == nil then
+		speedY = speedX
+	end
+
+	local dx = pd.math.lerp(self.x, x, speedX)
+	local dy = pd.math.lerp(self.y, y, speedY)
 
 	self:center(dx, dy)
 end

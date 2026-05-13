@@ -92,7 +92,13 @@ function MainGameLoop()
 	pd.frameTimer.updateTimers()
 
 	-- NOTE: Update camera, moved out of the player
-	GameManagerInstance.camera:lerp(GameManagerInstance.player.x, GameManagerInstance.player.y, 0.2)
+	-- GameManagerInstance.camera:lerp(GameManagerInstance.PlayerData.CameraTarget.x, GameManagerInstance.PlayerData.CameraTarget.y, 0.5, 0.05)
+	local YSpeed = 0.05
+	if GameManagerInstance.PlayerData.CameraTarget.y - GameManagerInstance.camera.y > 0 then
+		YSpeed = 0.3
+	end
+
+	GameManagerInstance.camera:lerp(GameManagerInstance.PlayerData.CameraTarget.x, GameManagerInstance.PlayerData.CameraTarget.y, 0.2, YSpeed)
 
 	pd.drawFPS(0, 0)
 end

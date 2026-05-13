@@ -244,7 +244,6 @@ function PlayerBoat:updateObject()
 	local collisions, _ = self.PhysicsComponent:move(self)
 
 	if self.PlayerData.bHoldingObject then
-		-- self.PlayerData.HeldImage:draw(self.x - 8, self.y - 32 - 8)
 		UISystem:drawImageAtWorld(self.PlayerData.HeldImage, self.x - 8, self.y - 32 - 8)
 	end
 
@@ -284,6 +283,8 @@ function PlayerBoat:updateObject()
 	if self.Invincible > 0 then
 		self.Invincible -= 1
 	end
+
+	self.PlayerData.CameraTarget = pd.geometry.point.new(self.x, self.y - 30)
 end
 
 function PlayerBoat:setAbilityA(func, name)

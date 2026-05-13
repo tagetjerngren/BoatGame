@@ -123,6 +123,8 @@ function PlayerData:init()
 	self.MaxCoins = 9999
 	self.coins = 0
 
+	self.CameraTarget = pd.geometry.point.new(0, 0)
+
 	self.abilities = {}
 	self.activeAbility = nil
 	for i = 1, 8 do
