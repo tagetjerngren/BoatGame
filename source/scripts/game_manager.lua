@@ -161,6 +161,25 @@ function GameManager:addPhysicsObject(object)
 	table.insert(self.physicsObjects, object)
 end
 
+function GameManager:removePhysicsObject(object)
+	local removeIndex = 0
+	for i = 1, #self.physicsObjects do
+		if self.physicsObjects[i] == object then
+			removeIndex = i
+			break
+		end
+	end
+	if removeIndex == 0 then
+		print("ERROR: Called remove on object that wasn't added: "..object.className)
+	else
+		table.remove(self.physicsObjects, removeIndex)
+	end
+end
+
+function GameManager:removeAllPhysicsObjects()
+	self.physicsObjects = {}
+end
+
 function GameManager:UpdatePhysics()
 	for i = 1, #self.physicsObjects do
 		if self.physicsObjects[i].PhysicsComponent then
@@ -267,9 +286,45 @@ function GameManager:CollisionResolution(Pairs)
 
 			if Pairs[i][1].PhysicsComponent and Direction == -1 then
 				Pairs[i][1].PhysicsComponent.bGrounded = true
+				Pairs[i][1].PhysicsComponent.StoodOnObject = Pairs[i][2]
 			end
 			if Pairs[i][2].PhysicsComponent and Direction == 1 then
 				Pairs[i][2].PhysicsComponent.bGrounded = true
+				Pairs[i][2].PhysicsComponent.StoodOnObject = Pairs[i][1]
+			end
+		end
+	end
+end
+
+function GameManager:calculateGrounded()
+	for i = 1, #self.physicsObjects do
+		self.physicsObjects[i].PhysicsComponent.bGrounded = false
+		self.physicsObjects[i].PhysicsComponent.StoodOnObject = nil
+
+		local x1, y1 = self.physicsObjects[i].x, self.physicsObjects[i].y
+		local xColl1, yColl1, width1, height1 = self.physicsObjects[i]:getCollideBounds()
+		local xCenter1, yCenter1 = self.physicsObjects[i]:getCenter()
+
+		local bottomLeft = pd.geometry.point.new(x1 - xCenter1 * width1, y1 + (1 - yCenter1) * height1)
+		local bottomRight = pd.geometry.point.new(x1 + (1 - xCenter1) * width1, y1 + (1 - yCenter1) * height1)
+
+		-- gfx.setColor(gfx.kColorWhite)
+		-- gfx.fillCircleAtPoint(bottomLeft.x, bottomLeft.y, 2)
+		-- gfx.fillCircleAtPoint(bottomRight.x, bottomRight.y, 2)
+
+		local leftCollisionSprite, _ = Raycast(bottomLeft.x, bottomLeft.y - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
+		if leftCollisionSprite then
+			if self.physicsObjects[i]:collisionResponse(leftCollisionSprite) == "slide" then
+				self.physicsObjects[i].PhysicsComponent.bGrounded = true
+				self.physicsObjects[i].PhysicsComponent.StoodOnObject = leftCollisionSprite
+			end
+		end
+
+		local rightCollisionSprite, _ = Raycast(bottomRight.x, bottomRight.y - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
+		if rightCollisionSprite then
+			if self.physicsObjects[i]:collisionResponse(rightCollisionSprite) == "slide" then
+				self.physicsObjects[i].PhysicsComponent.bGrounded = true
+				self.physicsObjects[i].PhysicsComponent.StoodOnObject = rightCollisionSprite
 			end
 		end
 	end
@@ -554,6 +609,7 @@ function GameManager:goToLevel(level_name)
 		end
 	end
 	self:removeAll()
+	self:removeAllPhysicsObjects()
 	self:add(self.player)
 	self:addPhysicsObject(self.player)
 	self:add(self.water)

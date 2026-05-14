@@ -146,7 +146,8 @@ function PlayerBoat:collisionResponse(other)
 		return "overlap"
 	end
 
-	assert(false, "Couldn't figure out how we wanted to respond to the collision")
+	-- assert(false, "Couldn't figure out how we wanted to respond to the collision")
+	return "slide"
 end
 
 function PlayerBoat:updateObject()
@@ -240,7 +241,7 @@ function PlayerBoat:updateObject()
 
 	self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
 
-	self.PhysicsComponent.bGrounded = false
+	-- self.PhysicsComponent.bGrounded = false
 	local collisions, _ = self.PhysicsComponent:move(self)
 
 	if self.PlayerData.bHoldingObject then
@@ -259,15 +260,17 @@ function PlayerBoat:updateObject()
 
 	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
 		self.GameManager:remove(self.GameManager.player)
+		self.GameManager:removePhysicsObject(self.GameManager.player)
 		self.GameManager.player = self.GameManager.playerInstance
 		self.GameManager.player.PhysicsComponent:setPosition(self.GameManager.player, self.GameManager.playerBoatInstance.x, self.GameManager.playerBoatInstance.y)
 		self.GameManager.unoccupiedBoat = UnoccupiedBoat(self.x, self.y, self.GameManager, self.GameManager.currentLevel)
-		self.GameManager:addPhysicsObject(self.GameManager.unoccupiedBoat)
 
 		table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.unoccupiedBoat.PhysicsComponent)
 
 		self.GameManager:add(self.GameManager.player)
 		self.GameManager:add(self.GameManager.unoccupiedBoat)
+		self.GameManager:addPhysicsObject(self.GameManager.player)
+		self.GameManager:addPhysicsObject(self.GameManager.unoccupiedBoat)
 
 		-- TODO: This loop and comparing feels pretty bad, make the array a map instead so it's easier to grab specific objects
 		for i, v in ipairs(self.GameManager.ActivePhysicsComponents) do

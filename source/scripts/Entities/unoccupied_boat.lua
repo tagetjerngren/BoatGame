@@ -37,17 +37,23 @@ function UnoccupiedBoat:init(x, y, gameManager, level)
 	self.notif = DpadNotif(x - 32, y - 32, 64, 32)
 end
 
+function UnoccupiedBoat:collisionResponse(other)
+	return "slide"
+end
+
 function UnoccupiedBoat:updateObject()
 	if pd.buttonJustPressed(pd.kButtonUp) then
 		local CollidingWithSprites = gfx.sprite.querySpritesInRect(self.x - 32, self.y - 32, 64, 64)
 		for _, sprite in ipairs(CollidingWithSprites) do
 			if sprite:isa(Player) then
 				self.GameManager:remove(self.GameManager.player)
+				self.GameManager:removePhysicsObject(self.GameManager.player)
 				self.GameManager.player = self.GameManager.playerBoatInstance
 				self.GameManager.player.PhysicsComponent:setPosition(self.GameManager.player, self.x, self.y)
 
 				table.insert(self.GameManager.ActivePhysicsComponents, self.GameManager.player.PhysicsComponent)
 				self.GameManager:add(self.GameManager.player)
+				self.GameManager:addPhysicsObject(self.GameManager.player)
 
 				-- TODO: This loop and comparing feels pretty bad, make the array a map instead so it's easier to grab specific objects
 				for i, v in ipairs(self.GameManager.ActivePhysicsComponents) do
@@ -56,6 +62,7 @@ function UnoccupiedBoat:updateObject()
 						break
 					end
 				end
+				self.GameManager:removePhysicsObject(self)
 				self.GameManager:remove(self)
 				self.GameManager:remove(self.notif)
 			end

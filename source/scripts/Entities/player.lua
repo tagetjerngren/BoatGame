@@ -343,17 +343,21 @@ end
 function Player:saveGroundedPosition()
 	if self.bUnderwater then
 		-- self:moveTo(self.LastGroundedX, self.LastGroundedY - 5)
-		self.PhysicsComponent:setPosition(self, self.LastGroundedX, self.LastGroundedY - 5)
+		-- self.PhysicsComponent:setPosition(self, self.LastGroundedX, self.LastGroundedY - 5)
+		self.PhysicsComponent:setPosition(self, self.LastGroundedObject.x + self.LastGroundedXOffset, self.LastGroundedObject.y + self.LastGroundedYOffset - 5)
 		self.PhysicsComponent:setVelocity(0, 0)
 		self:damage(1, 0)
 	elseif self.PhysicsComponent.bGrounded then
 		local checkWidth = 5
-		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y, 0, 8, {self}, {"DpadNotif"})
-		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y, 0, 8, {self}, {"DpadNotif"})
+		local leftCollisionSprite, _ = Raycast(self.x - checkWidth, self.y - 1, 0, 2, {self}, {"DpadNotif", "MovingPlatform"})
+		local rightCollisionSprite, _ = Raycast(self.x + checkWidth, self.y - 1, 0, 2, {self}, {"DpadNotif", "MovingPlatform"})
 		if leftCollisionSprite and rightCollisionSprite then
 			if self:collisionResponse(leftCollisionSprite) == "slide" and self:collisionResponse(rightCollisionSprite) == "slide" then
-				self.LastGroundedX = self.x
-				self.LastGroundedY = self.y
+				self.LastGroundedXOffset = self.x - (leftCollisionSprite or rightCollisionSprite).x
+				self.LastGroundedYOffset = self.y - (leftCollisionSprite or rightCollisionSprite).y
+				self.LastGroundedObject = (leftCollisionSprite or rightCollisionSprite)
+				-- self.LastGroundedX = self.x
+				-- self.LastGroundedY = self.y
 			end
 		end
 	end
@@ -441,7 +445,7 @@ function Player:updateObject()
 	end
 
 	-- self:calculateGrounded(collisions)
-	self.bUnderwater = self.y - 32 > self.GameManager.water.height
+	self.bUnderwater = self.y - 16 > self.GameManager.water.height
 
 	-- NOTE: Resets the jumped state when the player is on the ground
 	if self.PhysicsComponent.bGrounded then
@@ -460,7 +464,8 @@ function Player:updateObject()
 		self.Invincible -= 1
 	end
 	self:saveGroundedPosition()
-	self.PhysicsComponent.bGrounded = false
+	-- print(self.PhysicsComponent.bGrounded)
+	-- self.PhysicsComponent.bGrounded = false
 
 	self.cameraProgress = pd.math.lerp(self.cameraProgress, self.direction, 0.2)
 	self.PlayerData.CameraTarget.x = self.x + self.cameraProgress * 20

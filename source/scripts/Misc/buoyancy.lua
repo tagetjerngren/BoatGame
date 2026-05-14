@@ -28,6 +28,7 @@ function CalculateBuoyancy(WaterHeight, ObjectHeight, WaterPixelDepth, WaterDrag
 end
 
 function EntityIsCollisionGroup(object, group)
+	assert(object, "Object is nil!")
 	return (((2^(group - 1)) & object:getGroupMask()) ~= 0)
 end
 

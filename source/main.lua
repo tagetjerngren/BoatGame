@@ -87,6 +87,7 @@ function MainGameLoop()
 		local Pairs = GameManagerInstance:CollisionDetection()
 		GameManagerInstance:CollisionResolution(Pairs)
 	end
+	GameManagerInstance:calculateGrounded()
 	GameManagerInstance:lateUpdateObjects()
 	sprite_update()
 	pd.frameTimer.updateTimers()
