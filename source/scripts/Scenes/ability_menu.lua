@@ -59,7 +59,7 @@ function AbilityMenu:init(gameManager)
 			icons[(row - 1) * 4 + column]:draw(x + 6, y + 6)
 		end
 	end
-	self:add()
+	GameManagerInstance:add(self)
 	self.bActive = true
 end
 
@@ -68,7 +68,7 @@ local decisionSound = pd.sound.sampleplayer.new("sounds/SelectionMade")
 local GridWidth = 48 * 4 + 10
 local GridHeight = 48 * 2 + 10
 
-function AbilityMenu:update()
+function AbilityMenu:updateObject()
 	if self.bActive then
 		if pd.buttonJustPressed(pd.kButtonDown) then
 			self.grid:selectNextRow(false)
@@ -87,13 +87,13 @@ function AbilityMenu:update()
 			if self.abilities[(row - 1) * 4 + column].func then
 				self.gameManager.player.bActive = true
 				self.gameManager.PlayerData.activeAbility = self.abilities[(row - 1) * 4 + column]
-				self:remove()
+				GameManagerInstance:remove(self)
 			else
 				-- TODO: PLAY ERROR SOUND
 			end
 		elseif pd.buttonJustReleased(pd.kButtonB) then
 			self.gameManager.player.bActive = true
-			self:remove()
+			GameManagerInstance:remove(self)
 		end
 	end
 
