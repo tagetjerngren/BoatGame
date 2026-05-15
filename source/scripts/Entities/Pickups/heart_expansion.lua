@@ -1,11 +1,10 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
-
 class('HeartExpansion').extends(gfx.sprite)
 
 function HeartExpansion:init(x, y, entity)
+	self.PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
 	self:moveTo(x + 16, y + 16)
 	self.entity = entity
 	self:setImage(gfx.image.new("images/HeartIcon"))
@@ -17,7 +16,7 @@ end
 
 function HeartExpansion:collect(player)
 	PopupTextBox("*Health Expansion*", 3000, 20)
-	PickupSound:play()
+	self.PickupSound:play()
 	player.MaxHealth += 2
 	player.Health += 2
 	player.GameManager:collect(self.entity.iid)

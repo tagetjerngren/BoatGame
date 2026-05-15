@@ -1,8 +1,6 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
-
 class('WaterWheel').extends(gfx.sprite)
 
 function WaterWheel:init(x, y, entity, water)
@@ -20,6 +18,7 @@ function WaterWheel:init(x, y, entity, water)
 	self:add()
 
 	self.notif = DpadNotif(x, y, 64, 64)
+	self.PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
 end
 
 function WaterWheel:interact(player)
@@ -29,12 +28,12 @@ function WaterWheel:interact(player)
 			PopupTextBox("*WATER WHEEL*\nCrank to change the water level", 3000, 20)
 			self.water.bFirstCollection = false
 		end
-		PickupSound:play()
+		self.PickupSound:play()
 		self.water.bWaterWheelPossessed = true
 		self.bElectrified = false
 		self:getImage():setInverted(true)
 	else
-		PickupSound:play()
+		self.PickupSound:play()
 		self.entity.fields.PickedUp = true
 		player.GameManager:collect(self.entity.iid)
 		self.water.bWaterWheelPossessed = false

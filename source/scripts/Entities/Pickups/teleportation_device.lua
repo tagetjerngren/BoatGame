@@ -1,8 +1,6 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
-
 class('TeleportationDevice').extends(gfx.sprite)
 
 function TeleportationDevice:init(x, y, entity)
@@ -14,11 +12,13 @@ function TeleportationDevice:init(x, y, entity)
 	self:setCollidesWithGroups(COLLISION_GROUPS.PLAYER)
 	self:add()
 	self.id = 2
+	self.PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
+
 end
 
 function TeleportationDevice:collect(player)
 	PopupTextBox("*TELEPORTATION DEVICE*\nDouble tap left or right to warp", 3000, 20)
-	PickupSound:play()
+	self.PickupSound:play()
 	player.GameManager:collect(self.entity.iid)
 	-- player.bCanTeleport = true
 	player.PlayerData.abilities[self.id] = {

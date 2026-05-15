@@ -1,8 +1,6 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-local PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
-
 class('WheelPickup').extends(gfx.sprite)
 
 function WheelPickup:init(x, y, entity)
@@ -13,6 +11,7 @@ function WheelPickup:init(x, y, entity)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups(COLLISION_GROUPS.PLAYER)
 	self:add()
+	self.PickupSound = pd.sound.sampleplayer.new("sounds/ImportantCollectible")
 end
 
 function WheelPickup:collect(player)

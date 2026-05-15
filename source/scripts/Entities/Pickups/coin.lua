@@ -8,18 +8,15 @@ import "scripts/UIElements/option_box_horizontal"
 
 class('Coin').extends(gfx.sprite)
 
-local CoinImage = gfx.image.new("images/Coin")
-local CoinPickupSound = sampleplayerNew("sounds/CoinPickup")
-
 function Coin:init(x, y, entity)
 	self.entity = entity
 	self:moveTo(x + 8, y + 8)
-	self:setImage(CoinImage)
+	self:setImage(gfx.image.new("images/Coin"))
 	self:setCollideRect(0, 0, 16, 16)
 	self:setGroups(COLLISION_GROUPS.PICKUPS)
 	self:setCollidesWithGroups(COLLISION_GROUPS.PLAYER)
 	self:add()
-	self.coinPickupSound = CoinPickupSound
+	self.coinPickupSound = sampleplayerNew("sounds/CoinPickup")
 end
 
 function Coin:update()
