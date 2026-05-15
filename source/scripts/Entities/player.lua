@@ -182,17 +182,6 @@ function Player:collisionResponse(other)
 	-- assert(false, "Couldn't figure out how we wanted to respond to the collision")
 end
 
-function Player:calculateGrounded(collisions)
-	self.bGrounded = false
-	-- local collisions, _ = self.PhysicsComponent:move(self)
-	self.bUnderwater = self.y - 32 > self.GameManager.water.height
-	for i = 1, #collisions do
-		if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
-			self.bGrounded = true
-		end
-	end
-end
-
 function Player:keepPlayerWithinMap()
 	local bCollidingWithDoorTrigger = false
 
@@ -413,7 +402,7 @@ function Player:updateObject()
 
 		self:handleWalk()
 
-		collisions, _ = self.PhysicsComponent:move(self)
+		-- collisions, _ = self.PhysicsComponent:move(self)
 
 		-- NOTE: Pickup physics objects
 		if self.PlayerData.bHoldingObject then
@@ -444,7 +433,6 @@ function Player:updateObject()
 		end
 	end
 
-	-- self:calculateGrounded(collisions)
 	self.bUnderwater = self.y - 16 > self.GameManager.water.height
 
 	-- NOTE: Resets the jumped state when the player is on the ground

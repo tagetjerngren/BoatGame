@@ -18,7 +18,7 @@ function MovingPlatform:init(x, y, entity)
 	self:setCollidesWithGroups({COLLISION_GROUPS.PLAYER, COLLISION_GROUPS.ENEMY, COLLISION_GROUPS.PROJECTILE})
 
 	-- TODO: Make it so the physics component takes inverted mass instead, then set this to be ZERO
-	local mass = 10000
+	local mass = 100000000
 	local maxVelocity = 10
 	self.PhysicsComponent = PhysicsComponent(self.x, self.y, mass, maxVelocity)
 
@@ -29,32 +29,25 @@ function MovingPlatform:init(x, y, entity)
 
 	self.speed = entity.fields.Speed
 
-	-- self:add()
 	GameManagerInstance:add(self)
 	GameManagerInstance:addPhysicsObject(self)
+
+	self.direction = pd.geometry.vector2D.new(0, 0)
 end
 
 function MovingPlatform:collisionResponse(other)
 	return "slide"
 end
 
-local direction = pd.geometry.vector2D.new(0, 0)
 
 function MovingPlatform:updateObject()
-	-- direction = pd.geometry.vector2D.new(self.target.x - self.x, self.target.y - self.y)
-	direction.x = self.target.x - self.x
-	direction.y = self.target.y - self.y
-	if direction:magnitude() > self.speed then
-		direction:normalize()
-		direction *= self.speed
+	self.direction.x = self.target.x - self.x
+	self.direction.y = self.target.y - self.y
+	if self.direction:magnitude() > self.speed then
+		self.direction:normalize()
+		self.direction *= self.speed
 	end
-
-	self.PhysicsComponent.velocity = direction
-	self.PhysicsComponent:move(self)
-
-	-- self:moveBy(direction.x, direction.y)
-
-	-- if (pd.geometry.vector2D.new(self.x, self.y) - self.target):magnitude() == 0 then
+	-- print((self.PhysicsComponent.position - self.target):magnitude())
 	if (self.PhysicsComponent.position - self.target):magnitude() == 0 then
 		if self.target == self.endPoint then
 			self.target = self.startPoint
@@ -62,4 +55,6 @@ function MovingPlatform:updateObject()
 			self.target = self.endPoint
 		end
 	end
+
+	self.PhysicsComponent.velocity = self.direction
 end

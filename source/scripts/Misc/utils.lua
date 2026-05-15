@@ -18,11 +18,12 @@ local QuerySpriteInfoAlongLine <const> = playdate.graphics.sprite.querySpriteInf
 
 -- NOTE: ignoreClassesList is an array of strings, not so good
 function Raycast(sourceX, sourceY, directionX, directionY, ignoreSpritesList, ignoreClassesList)
-	local source = point_new(sourceX, sourceY)
+	-- local source = point_new(sourceX, sourceY)
 	local collisions, _ = QuerySpriteInfoAlongLine(sourceX, sourceY, sourceX + directionX, sourceY + directionY)
 	local closestCollision, closestCollisionLength, collisionPoint
 	for _, collision in ipairs(collisions) do
-		local distance = (collision.entryPoint - source):magnitude()
+		local distance = math.sqrt((collision.entryPoint.x - sourceX) * (collision.entryPoint.x - sourceX) + (collision.entryPoint.y - sourceY) * (collision.entryPoint.y - sourceY))
+		-- local distance = (collision.entryPoint - source):magnitude()
 		if not closestCollision or distance < closestCollisionLength then
 			local ignored = false
 			if ignoreSpritesList then

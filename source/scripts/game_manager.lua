@@ -1,13 +1,10 @@
 import "libraries/LDtk"
 
 -- NOTE: Pickups
-import "scripts/Entities/Pickups/ability_pickup"
 import "scripts/Entities/Pickups/change_size_device"
 import "scripts/Entities/Pickups/companion_pickup"
-import "scripts/Entities/Pickups/interest"
 import "scripts/Entities/Pickups/invisibility_device"
 import "scripts/Entities/Pickups/lantern"
-import "scripts/Entities/Pickups/submerge"
 import "scripts/Entities/Pickups/teleportation_device"
 import "scripts/Entities/Pickups/water_wheel"
 import "scripts/Entities/Pickups/wheel_pickup"
@@ -207,7 +204,7 @@ end
 function GameManager:CollisionResolution(Pairs)
 	for i = 1, #Pairs do
 		local x1, y1 = Pairs[i][1].x, Pairs[i][1].y
-		local xColl1, yColl1, width1, height1 = Pairs[i][1]:getCollideBounds()
+		local _, _, width1, height1 = Pairs[i][1]:getCollideBounds()
 		local xCenter1, yCenter1 = Pairs[i][1]:getCenter()
 
 		local topLeft = pd.geometry.point.new(x1 - xCenter1 * width1, y1 - yCenter1 * height1)
@@ -219,7 +216,7 @@ function GameManager:CollisionResolution(Pairs)
 		-- gfx.drawRect(topLeft.x, topLeft.y, width1, height1)
 
 		local x2, y2 = Pairs[i][2].x, Pairs[i][2].y
-		local xColl2, yColl2, width2, height2 = Pairs[i][2]:getCollideBounds()
+		local _, _, width2, height2 = Pairs[i][2]:getCollideBounds()
 		local xCenter2, yCenter2 = Pairs[i][2]:getCenter()
 
 		local topLeft2 = pd.geometry.point.new(x2 - xCenter2 * width2, y2 - yCenter2 * height2)
@@ -301,30 +298,31 @@ function GameManager:calculateGrounded()
 		self.physicsObjects[i].PhysicsComponent.bGrounded = false
 		self.physicsObjects[i].PhysicsComponent.StoodOnObject = nil
 
-		local x1, y1 = self.physicsObjects[i].x, self.physicsObjects[i].y
-		local xColl1, yColl1, width1, height1 = self.physicsObjects[i]:getCollideBounds()
-		local xCenter1, yCenter1 = self.physicsObjects[i]:getCenter()
+		local GroundedX, GroundedY = self.physicsObjects[i].x, self.physicsObjects[i].y
+		local _, _, ObjectWidth, ObjectHeight = self.physicsObjects[i]:getCollideBounds()
+		local ObjectCenterX, ObjectCenterY = self.physicsObjects[i]:getCenter()
 
-		local bottomLeft = pd.geometry.point.new(x1 - xCenter1 * width1, y1 + (1 - yCenter1) * height1)
-		local bottomRight = pd.geometry.point.new(x1 + (1 - xCenter1) * width1, y1 + (1 - yCenter1) * height1)
+		local ObjectBottom = GroundedY + (1 - ObjectCenterY) * ObjectHeight
+		local ObjectLeft = GroundedX - ObjectCenterX * ObjectWidth
+		local ObjectRight = GroundedX + (1 - ObjectCenterX) * ObjectWidth
 
 		-- gfx.setColor(gfx.kColorWhite)
 		-- gfx.fillCircleAtPoint(bottomLeft.x, bottomLeft.y, 2)
 		-- gfx.fillCircleAtPoint(bottomRight.x, bottomRight.y, 2)
 
-		local leftCollisionSprite, _ = Raycast(bottomLeft.x, bottomLeft.y - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
-		if leftCollisionSprite then
-			if self.physicsObjects[i]:collisionResponse(leftCollisionSprite) == "slide" then
+		local LeftCollisionSprite, _ = Raycast(ObjectLeft, ObjectBottom - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
+		if LeftCollisionSprite then
+			if self.physicsObjects[i]:collisionResponse(LeftCollisionSprite) == "slide" then
 				self.physicsObjects[i].PhysicsComponent.bGrounded = true
-				self.physicsObjects[i].PhysicsComponent.StoodOnObject = leftCollisionSprite
+				self.physicsObjects[i].PhysicsComponent.StoodOnObject = LeftCollisionSprite
 			end
 		end
 
-		local rightCollisionSprite, _ = Raycast(bottomRight.x, bottomRight.y - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
-		if rightCollisionSprite then
-			if self.physicsObjects[i]:collisionResponse(rightCollisionSprite) == "slide" then
+		local RightCollisionSprite, _ = Raycast(ObjectRight, ObjectBottom - 1, 0, 2, {self.physicsObjects[i]}, {"DpadNotif"})
+		if RightCollisionSprite then
+			if self.physicsObjects[i]:collisionResponse(RightCollisionSprite) == "slide" then
 				self.physicsObjects[i].PhysicsComponent.bGrounded = true
-				self.physicsObjects[i].PhysicsComponent.StoodOnObject = rightCollisionSprite
+				self.physicsObjects[i].PhysicsComponent.StoodOnObject = RightCollisionSprite
 			end
 		end
 	end

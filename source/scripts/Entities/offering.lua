@@ -87,13 +87,6 @@ function Offering:updateObject()
 		self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.1, 0)
 	end
 
-	self.PhysicsComponent.bGrounded = false
-	local collisions, _ = self.PhysicsComponent:move(self)
 	self.bUnderwater = self.y > GameManagerInstance.water.height
-	-- for i = 1, #collisions do
-	-- 	if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
-	-- 		self.bGrounded = true
-	-- 	end
-	-- end
 	self:keepWithinMap()
 end

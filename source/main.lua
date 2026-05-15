@@ -14,24 +14,28 @@ import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "CoreLibs/frameTimer"
 import "CoreLibs/crank"
 import "CoreLibs/math"
 import "CoreLibs/ui"
 
+import "libraries/LDtk"
+
 -- NOTE: Utilities
 import "scripts/Misc/camera"
 import "scripts/Misc/buoyancy"
-import "scripts/Misc/saves"
+-- import "scripts/Misc/saves"
 
 -- NOTE: Game Objects
-import "scripts/Entities/player"
-import "scripts/Misc/water"
+-- import "scripts/Entities/player"
+-- import "scripts/Misc/water"
 import "scripts/game_manager"
-import "scripts/Misc/ui"
-import "scripts/Scenes/mini_map_viewer"
-import "scripts/Scenes/collection_menu"
+-- import "scripts/Misc/ui"
+-- import "scripts/Scenes/mini_map_viewer"
+-- import "scripts/Scenes/collection_menu"
 import "scripts/Scenes/main_menu"
-import "scripts/Scenes/intro"
+-- import "scripts/Scenes/intro"
+
 
 
 local pd <const> = playdate
@@ -67,7 +71,7 @@ function MainGameLoop()
 	gfx.clear(gfx.kColorWhite)
 
 	-- Draws a black background 
-	oX, oY = gfx.getDrawOffset()
+	local oX, oY = gfx.getDrawOffset()
 	gfx.setColor(gfx.kColorBlack)
 	gfx.fillRect(-oX, -oY, 400, 320)
 
@@ -82,12 +86,15 @@ function MainGameLoop()
 	update_timers()
 	GameManagerInstance:earlyUpdateObjects()
 	GameManagerInstance:updateObjects()
-	-- GameManagerInstance:UpdatePhysics()
+
+	-- NOTE: The physics methods below seem to leak memory, or at least produce a lot of garbage, should maybe be moved to C
+	GameManagerInstance:UpdatePhysics()
 	for i = 1, 2 do
 		local Pairs = GameManagerInstance:CollisionDetection()
 		GameManagerInstance:CollisionResolution(Pairs)
 	end
 	GameManagerInstance:calculateGrounded()
+
 	GameManagerInstance:lateUpdateObjects()
 	sprite_update()
 	pd.frameTimer.updateTimers()
@@ -148,7 +155,6 @@ function IntroLoop()
 
 	if intro.done then
 		-- NOTE: On real hardware don't bother loading until someone starts the game
-
 		if not pd.isSimulator then
 			LDtk.load("levels/world.ldtk", true)
 		end

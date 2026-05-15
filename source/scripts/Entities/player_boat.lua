@@ -241,22 +241,11 @@ function PlayerBoat:updateObject()
 
 	self.PhysicsComponent:addForce(-self.PhysicsComponent.velocity.x * 0.2, 0)
 
-	-- self.PhysicsComponent.bGrounded = false
-	local collisions, _ = self.PhysicsComponent:move(self)
-
 	if self.PlayerData.bHoldingObject then
 		UISystem:drawImageAtWorld(self.PlayerData.HeldImage, self.x - 8, self.y - 32 - 8)
 	end
 
 	self.bUnderwater = self.y > self.GameManager.water.height
-	-- for i = 1, #collisions do
-	-- 	if collisions[i].normal.y == 1 and self.y - 22 > self.GameManager.water.height and self.PhysicsComponent.velocity.y == 0 then
-	-- 		self:damage(1, 15)
-	-- 	end
-	-- 	if collisions[i].normal.y == -1 and collisions[i].other:getGroupMask() == 8 then
-	-- 		self.bGrounded = true
-	-- 	end
-	-- end
 
 	if self.bActive and pd.buttonIsPressed(pd.kButtonUp) and pd.buttonJustPressed(pd.kButtonB) then
 		self.GameManager:remove(self.GameManager.player)
